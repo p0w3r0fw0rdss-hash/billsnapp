@@ -177,8 +177,8 @@ const app = {
             <div class="login-container">
                 <div class="login-card animate-in">
                     <div class="login-logo">
-                        <div style="width: 64px; height: 64px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                            <img src="public/icons/logo.png" alt="BillSnap" style="width: 60px; height: 60px; object-fit: contain;">
+                        <div style="width: 64px; height: 64px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden;">
+                            <img src="public/icons/logo.png" alt="BillSnap" style="width: 62px; height: 62px; object-fit: cover;">
                         </div>
                     </div>
                     <h1 class="login-title">BillSnap</h1>
@@ -242,8 +242,8 @@ const app = {
             <aside class="sidebar ${this.sidebarOpen ? 'open' : ''}" id="sidebar">
                 <div class="sidebar-header">
                     <div class="sidebar-logo">
-                        <div style="width: 38px; height: 38px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                            <img src="public/icons/logo.png" alt="BillSnap" style="width: 34px; height: 34px; object-fit: contain;">
+                        <div style="width: 38px; height: 38px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
+                            <img src="public/icons/logo.png" alt="BillSnap" style="width: 36px; height: 36px; object-fit: cover;">
                         </div>
                         <span class="sidebar-logo-text">BillSnap</span>
                     </div>

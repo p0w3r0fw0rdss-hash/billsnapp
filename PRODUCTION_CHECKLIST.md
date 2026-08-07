@@ -51,17 +51,28 @@
   - IBAN, método de pago
   - Email, teléfono
 
-### 🤖 IA Nativa (NUEVO - COMPLETO)
-- [x] **PaddleOCR**: ~20MB, 92% precisión, cualquier dispositivo
-- [x] **TrOCR Small**: ~250MB, 89% precisión, 4GB+ RAM
-- [x] **TrOCR Base**: ~600MB, 94% precisión, 8GB+ RAM
-- [x] **Nougat**: ~1GB, 96% precisión, 16GB+ RAM
-- [x] Auto-selección según recursos del dispositivo
-- [x] Preprocesado avanzado de imágenes
-- [x] Fallback a Tesseract si falla
-- [x] Barra de progreso de carga
-- [x] Cache del modelo en navegador
-- [x] **Guía de entrenamiento completa** (`docs/TRAINING_GUIDE.md`)
+### 🧠 Vision AI (NUEVO - MODELOS QUE RAZONAN)
+- [x] **Arquitectura VLM** (Vision-Language Models)
+- [x] **Ollama** (local, 100% privado, gratis):
+  - Qwen2.5-VL 7B (el mejor para facturas)
+  - Llama 3.2 Vision 11B (la mejor calidad)
+  - MiniCPM-V (compacto, eficiente)
+  - Moondream (ultra-ligero, 2GB VRAM)
+  - Gemma 3 4B (buen equilibrio)
+- [x] **APIs externas** (alternativas):
+  - OpenAI GPT-4o (la mejor calidad, ~$0.001/factura)
+  - Google Gemini (gratis, 15 req/min)
+  - HuggingFace (gratis, rate-limited)
+- [x] **Prompt engineering** para extracción JSON estructurada
+- [x] Auto-detección de proveedor disponible
+- [x] Configuración por usuario
+- [x] Instrucciones de setup integradas
+- [x] **NO necesita entrenar** - solo pasar la imagen
+
+### ⚡ OCR Básico (Fallback)
+- [x] Tesseract.js (siempre disponible)
+- [x] Preprocesado de imagen mejorado
+- [x] Extracción con regex para cuando no hay IA
 
 ### 🌐 APIs Externas
 - [x] OpenAI (gpt-4o-mini)
@@ -217,11 +228,12 @@
 | **Multi-idioma** | 5 | 4 | 55% |
 | **Autenticación** | 6 | 3 | 67% |
 | **Base de Datos** | 5 | 2 | 71% |
-| **OCR/IA** | 10 | 1 | 91% |
+| **Vision AI** | 12 | 0 | 100% |
+| **OCR Básico** | 5 | 0 | 100% |
 | **PDFs** | 6 | 0 | 100% |
 | **Billing** | 9 | 3 | 75% |
 | **Integraciones** | 6 | 4 | 60% |
-| **TOTAL** | **57** | **17** | **77%** |
+| **TOTAL** | **64** | **16** | **80%** |
 
 ---
 

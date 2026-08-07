@@ -41,12 +41,12 @@ const app = {
             // Initialize billing
             await Billing.init();
 
+            // Initialize Vision AI (VLM)
+            await VisionAI.init();
+
             // Load configurations
             await AIAPI.loadConfig();
             await GoogleSheets.loadConfig();
-
-            // Pre-load native AI in background
-            this.preloadNativeAI();
 
             // Render main app
             this.renderApp();
@@ -58,7 +58,12 @@ const app = {
                 await this.loadInvoices();
             }
 
-            this.showToast(i18n.t('auth.welcome', { name: currentUser.name }), 'success');
+            // Show AI status
+            const aiStatus = VisionAI.isAvailable() ? 
+                (i18n.getLang() === 'es' ? 'IA Vision conectada' : 'Vision AI connected') :
+                (i18n.getLang() === 'es' ? 'Configura IA en Ajustes' : 'Configure AI in Settings');
+            
+            this.showToast(`${i18n.t('auth.welcome', { name: currentUser.name })} · ${aiStatus}`, 'success');
         } catch (error) {
             console.error('Error initializing app:', error);
             this.showToast('Error initializing application', 'error');
@@ -556,7 +561,8 @@ const app = {
     async renderUpload(container) {
         const plan = Billing.getCurrentPlan();
         const isEs = i18n.getLang() === 'es';
-        const nativeReady = NativeAI.isAvailable();
+        const visionReady = VisionAI.isAvailable();
+        const recommendedModel = VisionAI.getRecommendedModel();
         
         container.innerHTML = `
             <div class="animate-in">
@@ -568,61 +574,97 @@ const app = {
                 <!-- Usage Indicator -->
                 ${await Billing.renderUsageIndicator()}
 
-                <!-- OCR Engine Selection -->
-                <div class="card" style="margin-bottom: 24px;">
+                <!-- AI Engine Selection -->
+                <div class="card" style="margin-bottom: 24px; border: ${visionReady ? '2px solid var(--accent-green)' : '1px solid var(--border-secondary)'};">
                     <div class="card-header">
-                        <span class="card-title">${i18n.t('upload.ocr_engine')}</span>
-                        <span class="badge badge-blue">${isEs ? 'Plan' : 'Plan'}: ${plan.name}</span>
+                        <span class="card-title">${isEs ? 'Motor de IA' : 'AI Engine'}</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            ${visionReady ? 
+                                `<span class="badge badge-green">${isEs ? '✅ Conectado' : '✅ Connected'}</span>` :
+                                `<span class="badge badge-orange">${isEs ? '⚠️ No conectado' : '⚠️ Not connected'}</span>`
+                            }
+                        </div>
                     </div>
                     <div class="card-body">
+                        ${!visionReady ? `
+                            <!-- Setup Instructions -->
+                            <div style="background: var(--accent-blue-light); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                                <h4 style="font-weight: 600; margin-bottom: 8px;">
+                                    ${isEs ? '🚀 Configura IA para empezar' : '🚀 Setup AI to get started'}
+                                </h4>
+                                <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">
+                                    ${isEs ? 
+                                        'BillSnap usa modelos de IA que RAZONAN sobre tus facturas. Sin entrenar, sin complicaciones.' :
+                                        'BillSnap uses AI models that REASON about your invoices. No training, no complications.'
+                                    }
+                                </p>
+                                
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px;">
+                                    <!-- Ollama Option -->
+                                    <div style="background: var(--bg-primary); border-radius: 8px; padding: 16px; border: 1px solid var(--border-secondary);">
+                                        <div style="font-weight: 600; margin-bottom: 4px;">${isEs ? 'Ollama (Recomendado)' : 'Ollama (Recommended)'}</div>
+                                        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">
+                                            ${isEs ? '100% local · Gratis · Privado' : '100% local · Free · Private'}
+                                        </div>
+                                        <code style="display: block; background: var(--bg-secondary); padding: 8px; border-radius: 4px; font-size: 12px; margin-bottom: 8px;">
+                                            ollama pull qwen2.5vl:7b
+                                        </code>
+                                        <a href="https://ollama.com" target="_blank" style="font-size: 13px; color: var(--accent-blue);">
+                                            ${isEs ? 'Descargar Ollama →' : 'Download Ollama →'}
+                                        </a>
+                                    </div>
+                                    
+                                    <!-- API Option -->
+                                    <div style="background: var(--bg-primary); border-radius: 8px; padding: 16px; border: 1px solid var(--border-secondary);">
+                                        <div style="font-weight: 600; margin-bottom: 4px;">${isEs ? 'API Externa' : 'External API'}</div>
+                                        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">
+                                            ${isEs ? 'OpenAI · Gemini · HuggingFace' : 'OpenAI · Gemini · HuggingFace'}
+                                        </div>
+                                        <button class="btn btn-primary btn-sm" style="width: 100%;" onclick="app.showSection('settings')">
+                                            ${isEs ? 'Configurar API Key' : 'Configure API Key'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <!-- Engine Selector -->
                         <div class="ocr-selector">
+                            <label class="ocr-option" style="${!visionReady ? 'opacity: 0.5; pointer-events: none;' : ''}">
+                                <input type="radio" name="ocr-engine" value="vision_ai" ${visionReady ? 'checked' : ''} ${!visionReady ? 'disabled' : ''}>
+                                <div class="ocr-option-card" style="${visionReady ? 'border-color: var(--accent-green); background: var(--accent-green-light);' : ''}">
+                                    <div class="ocr-option-name">🧠 Vision AI</div>
+                                    <div class="ocr-option-desc">${isEs ? 'Razona sobre el documento' : 'Reasons about the document'}</div>
+                                    <div class="ocr-option-accuracy">⭐⭐⭐⭐⭐ ${isEs ? 'La mejor precisión' : 'Best accuracy'}</div>
+                                </div>
+                            </label>
                             <label class="ocr-option">
-                                <input type="radio" name="ocr-engine" value="tesseract" checked>
+                                <input type="radio" name="ocr-engine" value="tesseract" ${!visionReady ? 'checked' : ''}>
                                 <div class="ocr-option-card">
-                                    <div class="ocr-option-name">${i18n.t('ocr.tesseract')}</div>
-                                    <div class="ocr-option-desc">${i18n.t('upload.ocr_local')}</div>
-                                    <div class="ocr-option-accuracy">⭐⭐⭐ ${i18n.t('ocr.precision')}</div>
+                                    <div class="ocr-option-name">🔤 Tesseract</div>
+                                    <div class="ocr-option-desc">${isEs ? 'OCR básico, sin IA' : 'Basic OCR, no AI'}</div>
+                                    <div class="ocr-option-accuracy">⭐⭐⭐ ${isEs ? 'Precisión media' : 'Medium accuracy'}</div>
                                 </div>
                             </label>
                             <label class="ocr-option" style="${!plan.ocrEngines.includes('native') ? 'opacity: 0.5; pointer-events: none;' : ''}">
                                 <input type="radio" name="ocr-engine" value="native" ${!plan.ocrEngines.includes('native') ? 'disabled' : ''}>
                                 <div class="ocr-option-card">
-                                    <div class="ocr-option-name">
-                                        ${i18n.t('ocr.native')}
+                                    <div class="ocr-option-name">⚡ ${isEs ? 'IA Nativa' : 'Native AI'}
                                         ${!plan.ocrEngines.includes('native') ? `<span style="font-size: 11px; color: var(--accent-orange);"> 🔒</span>` : ''}
                                     </div>
-                                    <div class="ocr-option-desc">${nativeReady ? (isEs ? 'IA en navegador, sin API' : 'Browser AI, no API') : i18n.t('upload.ocr_native')}</div>
-                                    <div class="ocr-option-accuracy">⭐⭐⭐⭐ ${i18n.t('ocr.precision')}</div>
-                                </div>
-                            </label>
-                            <label class="ocr-option" style="${!plan.ocrEngines.includes('api') ? 'opacity: 0.5; pointer-events: none;' : ''}">
-                                <input type="radio" name="ocr-engine" value="api" ${!plan.ocrEngines.includes('api') ? 'disabled' : ''}>
-                                <div class="ocr-option-card">
-                                    <div class="ocr-option-name">
-                                        ${i18n.t('ocr.api')}
-                                        ${!plan.ocrEngines.includes('api') ? `<span style="font-size: 11px; color: var(--accent-orange);"> 🔒</span>` : ''}
-                                    </div>
-                                    <div class="ocr-option-desc">${i18n.t('upload.ocr_api')}</div>
-                                    <div class="ocr-option-accuracy">⭐⭐⭐⭐⭐ ${i18n.t('ocr.precision')}</div>
-                                </div>
-                            </label>
-                            <label class="ocr-option" style="${!plan.ocrEngines.includes('ollama') ? 'opacity: 0.5; pointer-events: none;' : ''}">
-                                <input type="radio" name="ocr-engine" value="ollama" ${!plan.ocrEngines.includes('ollama') ? 'disabled' : ''}>
-                                <div class="ocr-option-card">
-                                    <div class="ocr-option-name">
-                                        ${i18n.t('ocr.ollama')}
-                                        ${!plan.ocrEngines.includes('ollama') ? `<span style="font-size: 11px; color: var(--accent-orange);"> 🔒</span>` : ''}
-                                    </div>
-                                    <div class="ocr-option-desc">${i18n.t('upload.ocr_gpu')}</div>
-                                    <div class="ocr-option-accuracy">⭐⭐⭐⭐ ${i18n.t('ocr.precision')}</div>
+                                    <div class="ocr-option-desc">${isEs ? 'IA en el navegador' : 'Browser-based AI'}</div>
+                                    <div class="ocr-option-accuracy">⭐⭐⭐⭐ ${isEs ? 'Buena precisión' : 'Good accuracy'}</div>
                                 </div>
                             </label>
                         </div>
-                        ${!plan.ocrEngines.includes('native') || !plan.ocrEngines.includes('api') ? `
-                            <div style="margin-top: 12px; padding: 12px; background: var(--accent-blue-light); border-radius: 8px; font-size: 13px; color: var(--accent-blue);">
-                                ${isEs ? '💡 Desbloquea motores de IA más precisos mejorando tu plan' : 
-                                         '💡 Unlock more accurate AI engines by upgrading your plan'}
-                                <a href="#" onclick="app.showSection('pricing'); return false;" style="font-weight: 600; text-decoration: underline;"> ${isEs ? 'Ver planes' : 'View plans'}</a>
+
+                        ${visionReady ? `
+                            <div style="margin-top: 12px; padding: 12px; background: var(--accent-green-light); border-radius: 8px; font-size: 13px;">
+                                ✅ <strong>${isEs ? 'Vision AI activa' : 'Vision AI active'}</strong> - 
+                                ${isEs ? 
+                                    'Sube una factura y la IA extraerá todos los datos automáticamente. Sin entrenar, sin complicaciones.' :
+                                    'Upload an invoice and the AI will extract all data automatically. No training, no complications.'
+                                }
                             </div>
                         ` : ''}
                     </div>
@@ -825,8 +867,11 @@ const app = {
                 item.progress = 30;
 
                 let result;
-                if (selectedEngine === 'native') {
-                    // Use native AI (browser-based)
+                if (selectedEngine === 'vision_ai') {
+                    // Vision AI - VLM that reasons about the document
+                    result = await VisionAI.processInvoice(base64);
+                } else if (selectedEngine === 'native') {
+                    // Native AI (browser-based)
                     result = await NativeAI.processInvoice(base64);
                 } else if (selectedEngine === 'tesseract') {
                     result = await TesseractOCR.processInvoice(base64);
@@ -1423,6 +1468,9 @@ const app = {
      * Render Settings section
      */
     renderSettings(container) {
+        const isEs = i18n.getLang() === 'es';
+        const recommendedModel = VisionAI.getRecommendedModel();
+        
         container.innerHTML = `
             <div class="animate-in">
                 <div class="page-header">
@@ -1459,28 +1507,69 @@ const app = {
                     <!-- AI Configuration -->
                     <div class="card">
                         <div class="card-header">
-                            <span class="card-title">${i18n.t('settings.ai_config')}</span>
+                            <span class="card-title">${isEs ? 'Configuración IA' : 'AI Configuration'}</span>
+                            <span class="badge ${VisionAI.isAvailable() ? 'badge-green' : 'badge-orange'}">
+                                ${VisionAI.isAvailable() ? (isEs ? 'Conectado' : 'Connected') : (isEs ? 'No conectado' : 'Not connected')}
+                            </span>
                         </div>
                         <div class="card-body">
+                            <!-- Vision AI Status -->
+                            <div style="background: var(--bg-secondary); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                                <h4 style="font-weight: 600; margin-bottom: 8px;">🧠 ${isEs ? 'Vision AI (Recomendado)' : 'Vision AI (Recommended)'}</h4>
+                                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+                                    ${isEs ? 
+                                        'Usa modelos de IA que razonan sobre tus facturas. Sin entrenar, sin complicaciones.' :
+                                        'Uses AI models that reason about your invoices. No training, no complications.'
+                                    }
+                                </p>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <code style="background: var(--bg-primary); padding: 6px 12px; border-radius: 4px; font-size: 12px;">
+                                        ollama pull qwen2.5vl:7b
+                                    </code>
+                                    <a href="https://ollama.com" target="_blank" class="btn btn-secondary btn-sm">
+                                        ${isEs ? 'Descargar Ollama' : 'Download Ollama'}
+                                    </a>
+                                    <button class="btn btn-ghost btn-sm" onclick="VisionAI.init().then(() => app.showSection('settings'))">
+                                        ${isEs ? 'Verificar conexión' : 'Test connection'}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Ollama Model Selection -->
                             <div class="form-group">
-                                <label class="form-label">${i18n.t('settings.ai_provider')}</label>
+                                <label class="form-label">${isEs ? 'Modelo Ollama' : 'Ollama Model'}</label>
+                                <select id="ollama-vision-model" class="form-input form-select">
+                                    <option value="qwen2.5vl:7b" selected>Qwen2.5-VL 7B - ${isEs ? 'El mejor para facturas' : 'Best for invoices'}</option>
+                                    <option value="llama3.2-vision:11b">Llama 3.2 Vision 11B - ${isEs ? 'La mejor calidad' : 'Best quality'}</option>
+                                    <option value="minicpm-v:latest">MiniCPM-V - ${isEs ? 'Compacto y eficiente' : 'Compact & efficient'}</option>
+                                    <option value="moondream:latest">Moondream - ${isEs ? 'Ultra-ligero' : 'Ultra-light'}</option>
+                                    <option value="gemma3:4b">Gemma 3 4B - ${isEs ? 'Buen equilibrio' : 'Good balance'}</option>
+                                </select>
+                                <div class="form-help">${isEs ? 'Modelo recomendado para tu dispositivo' : 'Recommended model for your device'}: <strong>${recommendedModel?.model || 'qwen2.5vl:7b'}</strong></div>
+                            </div>
+
+                            <hr style="margin: 16px 0; border-color: var(--border-secondary);">
+                            
+                            <!-- External API -->
+                            <h4 style="font-weight: 600; margin-bottom: 12px;">${isEs ? 'API Externa (alternativa)' : 'External API (alternative)'}</h4>
+                            
+                            <div class="form-group">
+                                <label class="form-label">${isEs ? 'Proveedor' : 'Provider'}</label>
                                 <select id="ai-provider" class="form-input form-select">
-                                    <option value="">${i18n.t('misc.select')}</option>
-                                    <option value="openai">OpenAI</option>
+                                    <option value="">${isEs ? 'Seleccionar' : 'Select'}</option>
+                                    <option value="openai">OpenAI (GPT-4o)</option>
                                     <option value="gemini">Google Gemini</option>
                                     <option value="huggingface">HuggingFace</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">${i18n.t('settings.ai_key')}</label>
+                                <label class="form-label">API Key</label>
                                 <input type="password" id="ai-api-key" class="form-input" placeholder="sk-...">
-                                <div class="form-help">${i18n.t('settings.ai_key_help')}</div>
+                                <div class="form-help">${isEs ? 'Tu API key se guarda localmente en tu navegador' : 'Your API key is stored locally in your browser'}</div>
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">${i18n.t('settings.ollama_url')}</label>
-                                <input type="text" id="ollama-url" class="form-input" placeholder="http://localhost:11434">
-                            </div>
-                            <button class="btn btn-primary" style="width: 100%;" onclick="app.saveAIConfig()">${i18n.t('settings.save')}</button>
+                            <button class="btn btn-primary" style="width: 100%;" onclick="app.saveAIConfig()">
+                                ${isEs ? 'Guardar configuración' : 'Save configuration'}
+                            </button>
                         </div>
                     </div>
 
@@ -1753,8 +1842,17 @@ const app = {
     async saveAIConfig() {
         const provider = document.getElementById('ai-provider').value;
         const apiKey = document.getElementById('ai-api-key').value;
-        const ollamaUrl = document.getElementById('ollama-url').value;
-        await AIAPI.saveConfig(provider, apiKey, ollamaUrl);
+        const ollamaModel = document.getElementById('ollama-vision-model')?.value;
+        
+        await AIAPI.saveConfig(provider, apiKey, 'http://localhost:11434');
+        
+        if (ollamaModel) {
+            await DB.saveSetting('ollama_vision_model', ollamaModel);
+        }
+        
+        // Re-test Vision AI connection
+        await VisionAI.init();
+        
         this.showToast(i18n.t('msg.saved'), 'success');
     },
 

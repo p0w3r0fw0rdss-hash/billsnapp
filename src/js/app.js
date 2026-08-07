@@ -41,8 +41,8 @@ const app = {
             // Initialize billing
             await Billing.init();
 
-            // Initialize Vision AI (VLM)
-            await VisionAI.init();
+            // Detect available AI engines
+            await this.detectAIEngines();
 
             // Load configurations
             await AIAPI.loadConfig();
@@ -59,15 +59,62 @@ const app = {
             }
 
             // Show AI status
-            const aiStatus = VisionAI.isAvailable() ? 
-                (i18n.getLang() === 'es' ? 'IA Vision conectada' : 'Vision AI connected') :
-                (i18n.getLang() === 'es' ? 'Configura IA en Ajustes' : 'Configure AI in Settings');
-            
+            const aiStatus = this.getAIStatusText();
             this.showToast(`${i18n.t('auth.welcome', { name: currentUser.name })} · ${aiStatus}`, 'success');
         } catch (error) {
             console.error('Error initializing app:', error);
             this.showToast('Error initializing application', 'error');
         }
+    },
+
+    /**
+     * Detect available AI engines
+     */
+    async detectAIEngines() {
+        this.aiEngines = {
+            webllm: false,
+            ollama: false,
+            visionai: false,
+            webgpu: false
+        };
+
+        // Check WebGPU
+        const gpuCheck = await WebLLMAI.checkWebGPU();
+        this.aiEngines.webgpu = gpuCheck.available;
+
+        // Check Ollama
+        try {
+            const response = await fetch('http://localhost:11434/api/tags', { 
+                signal: AbortSignal.timeout(2000) 
+            });
+            this.aiEngines.ollama = response.ok;
+        } catch {}
+
+        // Check Vision AI
+        await VisionAI.init();
+        this.aiEngines.visionai = VisionAI.isAvailable();
+
+        // Check WebLLM (needs WebGPU)
+        if (this.aiEngines.webgpu) {
+            this.aiEngines.webllm = true; // Available but not loaded yet
+        }
+
+        console.log('AI Engines detected:', this.aiEngines);
+    },
+
+    /**
+     * Get AI status text
+     */
+    getAIStatusText() {
+        const isEs = i18n.getLang() === 'es';
+        
+        if (this.aiEngines.ollama || this.aiEngines.visionai) {
+            return isEs ? '🧠 Vision AI lista' : '🧠 Vision AI ready';
+        }
+        if (this.aiEngines.webllm) {
+            return isEs ? '⚡ WebLLM disponible' : '⚡ WebLLM available';
+        }
+        return isEs ? '💡 Configura IA en Ajustes' : '💡 Configure AI in Settings';
     },
 
     /**
@@ -868,15 +915,19 @@ const app = {
 
                 let result;
                 if (selectedEngine === 'vision_ai') {
-                    // Vision AI - VLM that reasons about the document
+                    // Vision AI - VLM (Ollama or API) that reasons about the document
                     result = await VisionAI.processInvoice(base64);
+                } else if (selectedEngine === 'webllm') {
+                    // WebLLM - AI in browser, no install needed
+                    result = await WebLLMAI.processInvoice(base64);
                 } else if (selectedEngine === 'native') {
-                    // Native AI (browser-based)
+                    // Native AI (browser-based OCR)
                     result = await NativeAI.processInvoice(base64);
                 } else if (selectedEngine === 'tesseract') {
+                    // Basic OCR fallback
                     result = await TesseractOCR.processInvoice(base64);
                 } else {
-                    // External APIs (OpenAI, Gemini, HuggingFace, Ollama)
+                    // External APIs (OpenAI, Gemini, HuggingFace)
                     const base64Data = base64.split(',')[1];
                     result = await AIAPI.processInvoice(base64Data, selectedEngine);
                 }

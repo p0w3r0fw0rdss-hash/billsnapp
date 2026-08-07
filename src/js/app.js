@@ -41,6 +41,15 @@ const app = {
             // Initialize billing
             await Billing.init();
 
+            // Initialize companies
+            await Companies.init();
+
+            // Initialize email
+            await Email.loadConfig();
+
+            // Initialize accounting
+            await Accounting.init();
+
             // Detect available AI engines
             await this.detectAIEngines();
 
@@ -375,7 +384,7 @@ const app = {
                 contentArea.innerHTML = Billing.renderPricingPage(i18n.getLang());
                 break;
             case 'settings':
-                this.renderSettings(contentArea);
+                await this.renderSettings(contentArea);
                 break;
         }
     },
@@ -505,8 +514,7 @@ const app = {
         if (monthlyCtx) {
             if (this.charts.monthly) this.charts.monthly.destroy();
 
-            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const isEs = i18n.getLang() === 'es';
+            let monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             if (isEs) {
                 monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
             }
@@ -1273,10 +1281,14 @@ const app = {
         const invoice = await DB.getInvoice(id);
         if (!invoice) return;
 
+        const isEs = i18n.getLang() === 'es';
+        const type = invoice.type || 'expense';
+        const categoryInfo = Accounting.getCategoryInfo(invoice.category, type);
+
         const modal = document.getElementById('modal-content');
         modal.innerHTML = `
             <div class="modal-header">
-                <h3 class="modal-title">${i18n.getLang() === 'es' ? 'Detalle de Factura' : 'Invoice Details'}</h3>
+                <h3 class="modal-title">${isEs ? 'Detalle de Factura' : 'Invoice Details'}</h3>
                 <button class="btn btn-ghost btn-icon" onclick="app.closeModal()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -1285,37 +1297,45 @@ const app = {
                 </button>
             </div>
             <div class="modal-body">
+                <!-- Type and Category -->
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                    <span class="badge ${type === 'income' ? 'badge-green' : 'badge-red'}">
+                        ${type === 'income' ? (isEs ? 'Ingreso' : 'Income') : (isEs ? 'Gasto' : 'Expense')}
+                    </span>
+                    <span class="badge badge-blue">${categoryInfo.icon} ${isEs ? categoryInfo.name : categoryInfo.nameEn}</span>
+                </div>
+
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
                     <div>
-                        <div style="font-size: 13px; color: var(--text-tertiary); margin-bottom: 4px;">${i18n.t('invoices.number')}</div>
+                        <div style="font-size: 13px; color: var(--text-tertiary); margin-bottom: 4px;">${isEs ? 'Número' : 'Number'}</div>
                         <div style="font-size: 16px; font-weight: 600;">${invoice.invoiceNumber || '-'}</div>
                     </div>
                     <div>
-                        <div style="font-size: 13px; color: var(--text-tertiary); margin-bottom: 4px;">${i18n.t('invoices.date')}</div>
+                        <div style="font-size: 13px; color: var(--text-tertiary); margin-bottom: 4px;">${isEs ? 'Fecha' : 'Date'}</div>
                         <div style="font-size: 16px; font-weight: 600;">${i18n.formatDate(invoice.date)}</div>
                     </div>
                 </div>
 
                 <div style="background: var(--bg-secondary); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-                    <div style="font-size: 12px; color: var(--text-tertiary); margin-bottom: 8px;">${i18n.t('invoices.issuer')}</div>
+                    <div style="font-size: 12px; color: var(--text-tertiary); margin-bottom: 8px;">${isEs ? 'Emisor' : 'Issuer'}</div>
                     <div style="font-weight: 600;">${invoice.issuer?.name || '-'}</div>
                     <div style="font-size: 14px; color: var(--text-secondary);">${invoice.issuer?.nif ? `NIF: ${invoice.issuer.nif}` : ''}</div>
                 </div>
 
                 ${invoice.description ? `
                     <div style="margin-bottom: 16px;">
-                        <div style="font-size: 12px; color: var(--text-tertiary); margin-bottom: 4px;">${i18n.t('invoices.concept')}</div>
+                        <div style="font-size: 12px; color: var(--text-tertiary); margin-bottom: 4px;">${isEs ? 'Concepto' : 'Description'}</div>
                         <div>${invoice.description}</div>
                     </div>
                 ` : ''}
 
                 <div style="border-top: 1px solid var(--border-secondary); padding-top: 16px;">
                     <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-                        <span style="color: var(--text-secondary);">${i18n.t('invoices.base')}:</span>
+                        <span style="color: var(--text-secondary);">${isEs ? 'Base imponible' : 'Base amount'}:</span>
                         <span>${i18n.formatCurrency(invoice.baseAmount)}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-                        <span style="color: var(--text-secondary);">${i18n.t('invoices.iva_amount')} (${invoice.ivaPercent || 21}%):</span>
+                        <span style="color: var(--text-secondary);">IVA (${invoice.ivaPercent || 21}%):</span>
                         <span>${i18n.formatCurrency(invoice.ivaAmount)}</span>
                     </div>
                     ${invoice.irpfPercent > 0 ? `
@@ -1325,15 +1345,18 @@ const app = {
                         </div>
                     ` : ''}
                     <div style="display: flex; justify-content: space-between; padding: 16px 0 0; border-top: 2px solid var(--accent-blue); margin-top: 8px;">
-                        <span style="font-size: 18px; font-weight: 700;">${i18n.t('invoices.total')}:</span>
+                        <span style="font-size: 18px; font-weight: 700;">${isEs ? 'Total' : 'Total'}:</span>
                         <span style="font-size: 18px; font-weight: 700; color: var(--accent-blue);">${i18n.formatCurrency(invoice.total)}</span>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="app.closeModal()">${i18n.t('action.close')}</button>
+                <button class="btn btn-secondary" onclick="app.closeModal()">${isEs ? 'Cerrar' : 'Close'}</button>
+                <button class="btn btn-secondary" onclick="app.emailInvoice('${invoice.id}')" title="${isEs ? 'Enviar por email' : 'Send via email'}">
+                    ✉️
+                </button>
                 <button class="btn btn-primary" onclick="app.downloadInvoicePDF('${invoice.id}')">
-                    ${i18n.t('action.download')} PDF
+                    📄 ${isEs ? 'Descargar PDF' : 'Download PDF'}
                 </button>
             </div>
         `;
@@ -1569,9 +1592,10 @@ const app = {
     /**
      * Render Settings section
      */
-    renderSettings(container) {
+    async renderSettings(container) {
         const isEs = i18n.getLang() === 'es';
         const recommendedModel = VisionAI.getRecommendedModel();
+        const currentCompany = Companies.getCurrentCompany();
         
         container.innerHTML = `
             <div class="animate-in">
@@ -1579,28 +1603,34 @@ const app = {
                     <h1 class="page-title">${i18n.t('settings.title')}</h1>
                 </div>
 
+                <!-- Company Selector -->
+                <div style="margin-bottom: 24px; display: flex; align-items: center; gap: 16px;">
+                    <span style="font-size: 14px; color: var(--text-secondary);">${isEs ? 'Empresa activa:' : 'Active company:'}</span>
+                    ${Companies.renderSelector(i18n.getLang())}
+                </div>
+
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 16px;">
                     <!-- Company Data -->
                     <div class="card">
                         <div class="card-header">
-                            <span class="card-title">${i18n.t('settings.company')}</span>
+                            <span class="card-title">${i18n.t('settings.company')} - ${currentCompany?.name || ''}</span>
                         </div>
                         <div class="card-body">
                             <div class="form-group">
                                 <label class="form-label">${i18n.t('settings.company_name')}</label>
-                                <input type="text" id="company-name" class="form-input" placeholder="My Company S.L.">
+                                <input type="text" id="company-name" class="form-input" value="${currentCompany?.name || ''}" placeholder="My Company S.L.">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">${i18n.t('settings.company_nif')}</label>
-                                <input type="text" id="company-nif" class="form-input" placeholder="B-12345678">
+                                <input type="text" id="company-nif" class="form-input" value="${currentCompany?.nif || ''}" placeholder="B-12345678">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">${i18n.t('settings.company_address')}</label>
-                                <input type="text" id="company-address" class="form-input" placeholder="123 Main St, City">
+                                <input type="text" id="company-address" class="form-input" value="${currentCompany?.address || ''}" placeholder="123 Main St, City">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">${i18n.t('settings.company_email')}</label>
-                                <input type="email" id="company-email" class="form-input" placeholder="info@company.com">
+                                <input type="email" id="company-email" class="form-input" value="${currentCompany?.email || ''}" placeholder="info@company.com">
                             </div>
                             <button class="btn btn-primary" style="width: 100%;" onclick="app.saveCompanyData()">${i18n.t('settings.save')}</button>
                         </div>
@@ -1723,6 +1753,11 @@ const app = {
                     </div>
                 </div>
 
+                <!-- Company Management -->
+                <div style="margin-top: 24px;">
+                    ${Companies.renderManagement(i18n.getLang())}
+                </div>
+
                 ${Auth.hasPermission('users') ? `
                     <div style="margin-top: 24px;" id="user-management">
                         ${Auth.renderUserManagement()}
@@ -1735,9 +1770,63 @@ const app = {
     /**
      * Handle search
      */
-    handleSearch(query) {
-        // TODO: Implement search functionality
-        console.log('Search:', query);
+    async handleSearch(query) {
+        if (!query || query.length < 2) return;
+        
+        const isEs = i18n.getLang() === 'es';
+        const invoices = await DB.getAllInvoices();
+        
+        const results = invoices.filter(inv => {
+            const searchStr = (
+                (inv.invoiceNumber || '') + ' ' +
+                (inv.issuer?.name || '') + ' ' +
+                (inv.receiver?.name || '') + ' ' +
+                (inv.description || '') + ' ' +
+                (inv.category || '')
+            ).toLowerCase();
+            return searchStr.includes(query.toLowerCase());
+        });
+
+        // Show results in a modal
+        const modal = document.getElementById('modal-content');
+        modal.innerHTML = `
+            <div class="modal-header">
+                <h3 class="modal-title">${isEs ? 'Resultados de búsqueda' : 'Search results'}: "${query}"</h3>
+                <button class="btn btn-ghost btn-icon" onclick="app.closeModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                ${results.length === 0 ? `
+                    <p style="text-align: center; color: var(--text-tertiary); padding: 40px;">
+                        ${isEs ? 'No se encontraron resultados' : 'No results found'}
+                    </p>
+                ` : `
+                    <p style="margin-bottom: 16px; color: var(--text-secondary);">${results.length} ${isEs ? 'resultados' : 'results'}</p>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        ${results.slice(0, 20).map(inv => {
+                            const type = inv.type || 'expense';
+                            return `
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid var(--border-secondary); cursor: pointer;" onclick="app.closeModal(); app.viewInvoice('${inv.id}')">
+                                    <span class="badge ${type === 'income' ? 'badge-green' : 'badge-red'}" style="min-width: 60px; text-align: center;">
+                                        ${type === 'income' ? (isEs ? 'Ingreso' : 'Income') : (isEs ? 'Gasto' : 'Expense')}
+                                    </span>
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 500;">${inv.issuer?.name || '-'}</div>
+                                        <div style="font-size: 12px; color: var(--text-tertiary);">${i18n.formatDate(inv.date)} · ${inv.description || ''}</div>
+                                    </div>
+                                    <div style="font-weight: 600;">${Helpers.formatCurrency(inv.total)}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `}
+            </div>
+        `;
+        document.getElementById('modal-overlay').classList.add('active');
     },
 
     /**
@@ -1933,11 +2022,23 @@ const app = {
      * Settings functions
      */
     async saveCompanyData() {
+        const currentCompany = Companies.getCurrentCompany();
+        if (currentCompany) {
+            await Companies.updateCompany(currentCompany.id, {
+                name: document.getElementById('company-name').value,
+                nif: document.getElementById('company-nif').value,
+                address: document.getElementById('company-address').value,
+                email: document.getElementById('company-email').value
+            });
+        }
+        
+        // Also save to general settings for backward compatibility
         const fields = { 'company-name': 'company_name', 'company-nif': 'company_nif', 'company-address': 'company_address', 'company-email': 'company_email' };
         for (const [elId, key] of Object.entries(fields)) {
             const value = document.getElementById(elId)?.value;
             if (value) await DB.saveSetting(key, value);
         }
+        
         this.showToast(i18n.t('msg.saved'), 'success');
     },
 
@@ -1977,6 +2078,224 @@ const app = {
         const url = GoogleSheets.generateSheetViewUrl();
         if (url) window.open(url, '_blank');
         else this.showToast('Connect Google Sheets first', 'error');
+    },
+
+    /**
+     * Switch company
+     */
+    async switchCompany(companyId) {
+        try {
+            await Companies.switchCompany(companyId);
+            await Accounting.init(); // Reload accounting for new company
+            this.renderApp();
+            this.loadDashboard();
+            this.showToast(i18n.getLang() === 'es' ? 'Empresa cambiada' : 'Company switched', 'success');
+        } catch (error) {
+            this.showToast(error.message, 'error');
+        }
+    },
+
+    /**
+     * Show add company modal
+     */
+    showAddCompanyModal() {
+        const isEs = i18n.getLang() === 'es';
+        const modal = document.getElementById('modal-content');
+        
+        modal.innerHTML = `
+            <div class="modal-header">
+                <h3 class="modal-title">${isEs ? 'Añadir empresa' : 'Add company'}</h3>
+                <button class="btn btn-ghost btn-icon" onclick="app.closeModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">${isEs ? 'Nombre de la empresa' : 'Company name'} *</label>
+                    <input type="text" id="new-company-name" class="form-input" placeholder="${isEs ? 'Mi Empresa S.L.' : 'My Company Ltd.'}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">NIF/CIF</label>
+                    <input type="text" id="new-company-nif" class="form-input" placeholder="B12345678">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">${isEs ? 'Dirección' : 'Address'}</label>
+                    <input type="text" id="new-company-address" class="form-input" placeholder="${isEs ? 'Calle Mayor 1, Madrid' : '123 Main St, City'}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="new-company-email" class="form-input" placeholder="info@empresa.com">
+                </div>
+                <div id="add-company-error" class="hidden" style="color: var(--accent-red); font-size: 13px; margin-bottom: 16px;"></div>
+                <button class="btn btn-primary" style="width: 100%;" onclick="app.addCompany()">
+                    ${isEs ? 'Añadir empresa' : 'Add company'}
+                </button>
+            </div>
+        `;
+        document.getElementById('modal-overlay').classList.add('active');
+    },
+
+    /**
+     * Add company
+     */
+    async addCompany() {
+        const isEs = i18n.getLang() === 'es';
+        const errorEl = document.getElementById('add-company-error');
+        
+        try {
+            const name = document.getElementById('new-company-name').value;
+            if (!name) {
+                errorEl.textContent = isEs ? 'El nombre es obligatorio' : 'Name is required';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            await Companies.addCompany({
+                name,
+                nif: document.getElementById('new-company-nif').value,
+                address: document.getElementById('new-company-address').value,
+                email: document.getElementById('new-company-email').value
+            });
+
+            this.closeModal();
+            this.renderApp();
+            this.showToast(isEs ? 'Empresa añadida' : 'Company added', 'success');
+        } catch (error) {
+            errorEl.textContent = error.message;
+            errorEl.classList.remove('hidden');
+        }
+    },
+
+    /**
+     * Edit company
+     */
+    async editCompany(companyId) {
+        const isEs = i18n.getLang() === 'es';
+        const company = Companies.getAllCompanies().find(c => c.id === companyId);
+        if (!company) return;
+
+        const modal = document.getElementById('modal-content');
+        modal.innerHTML = `
+            <div class="modal-header">
+                <h3 class="modal-title">${isEs ? 'Editar empresa' : 'Edit company'}</h3>
+                <button class="btn btn-ghost btn-icon" onclick="app.closeModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">${isEs ? 'Nombre de la empresa' : 'Company name'} *</label>
+                    <input type="text" id="edit-company-name" class="form-input" value="${company.name}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">NIF/CIF</label>
+                    <input type="text" id="edit-company-nif" class="form-input" value="${company.nif || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">${isEs ? 'Dirección' : 'Address'}</label>
+                    <input type="text" id="edit-company-address" class="form-input" value="${company.address || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="edit-company-email" class="form-input" value="${company.email || ''}">
+                </div>
+                <button class="btn btn-primary" style="width: 100%;" onclick="app.saveCompanyEdit('${companyId}')">
+                    ${isEs ? 'Guardar' : 'Save'}
+                </button>
+            </div>
+        `;
+        document.getElementById('modal-overlay').classList.add('active');
+    },
+
+    /**
+     * Save company edit
+     */
+    async saveCompanyEdit(companyId) {
+        try {
+            await Companies.updateCompany(companyId, {
+                name: document.getElementById('edit-company-name').value,
+                nif: document.getElementById('edit-company-nif').value,
+                address: document.getElementById('edit-company-address').value,
+                email: document.getElementById('edit-company-email').value
+            });
+
+            this.closeModal();
+            this.renderApp();
+            this.showToast(i18n.getLang() === 'es' ? 'Empresa actualizada' : 'Company updated', 'success');
+        } catch (error) {
+            this.showToast(error.message, 'error');
+        }
+    },
+
+    /**
+     * Email invoice
+     */
+    async emailInvoice(invoiceId) {
+        const isEs = i18n.getLang() === 'es';
+        const invoice = await DB.getInvoice(invoiceId);
+        if (!invoice) return;
+
+        const modal = document.getElementById('modal-content');
+        modal.innerHTML = `
+            <div class="modal-header">
+                <h3 class="modal-title">${isEs ? 'Enviar factura por email' : 'Send invoice via email'}</h3>
+                <button class="btn btn-ghost btn-icon" onclick="app.closeModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">${isEs ? 'Email del destinatario' : 'Recipient email'}</label>
+                    <input type="email" id="email-recipient" class="form-input" value="${invoice.receiver?.email || invoice.issuer?.email || ''}" placeholder="email@ejemplo.com">
+                </div>
+                <div style="background: var(--bg-secondary); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                    <div style="font-weight: 500;">${invoice.invoiceNumber || '-'}</div>
+                    <div style="font-size: 13px; color: var(--text-secondary);">${invoice.issuer?.name || '-'} · ${Helpers.formatCurrency(invoice.total)}</div>
+                </div>
+                <button class="btn btn-primary" style="width: 100%;" onclick="app.sendInvoiceEmail('${invoiceId}')">
+                    ${isEs ? 'Enviar' : 'Send'}
+                </button>
+            </div>
+        `;
+        document.getElementById('modal-overlay').classList.add('active');
+    },
+
+    /**
+     * Send invoice email
+     */
+    async sendInvoiceEmail(invoiceId) {
+        const isEs = i18n.getLang() === 'es';
+        try {
+            const invoice = await DB.getInvoice(invoiceId);
+            const recipient = document.getElementById('email-recipient').value;
+            
+            if (!recipient) {
+                this.showToast(isEs ? 'Introduce un email' : 'Enter an email', 'error');
+                return;
+            }
+
+            await Email.sendInvoice(invoice, recipient);
+            this.closeModal();
+            this.showToast(isEs ? 'Email enviado' : 'Email sent', 'success');
+        } catch (error) {
+            this.showToast(error.message, 'error');
+        }
+    },
+
+    /**
+     * Show company management in settings
+     */
+    renderCompanyManagement() {
+        return Companies.renderManagement(i18n.getLang());
     }
 };
 

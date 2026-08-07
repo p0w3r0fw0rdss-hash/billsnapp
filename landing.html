@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BillSnap - Organiza tus facturas con IA</title>
+    <meta name="description" content="Sube fotos de facturas y la IA las organiza automáticamente. Contabilidad automática para autónomos y PYMES.">
+    <meta name="theme-color" content="#0071e3">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, sans-serif; color: #1d1d1f; line-height: 1.5; }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        
+        /* Hero */
+        .hero { 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+        .hero-content { position: relative; z-index: 1; }
+        .hero h1 { font-size: 56px; font-weight: 800; line-height: 1.1; margin-bottom: 24px; }
+        .hero p { font-size: 20px; opacity: 0.9; margin-bottom: 40px; max-width: 600px; }
+        .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
+        
+        .btn-primary {
+            background: white;
+            color: #667eea;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.3); }
+        
+        /* Features */
+        .features { padding: 120px 0; background: #f5f5f7; }
+        .features-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 32px; 
+            margin-top: 60px; 
+        }
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.1); }
+        .feature-icon { font-size: 48px; margin-bottom: 16px; }
+        .feature-card h3 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+        .feature-card p { color: #6e6e73; font-size: 15px; }
+        
+        /* How it works */
+        .how-it-works { padding: 120px 0; }
+        .steps { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 40px; 
+            margin-top: 60px; 
+        }
+        .step { text-align: center; }
+        .step-number { 
+            width: 64px; 
+            height: 64px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 24px; 
+            font-weight: 700; 
+            margin: 0 auto 16px; 
+        }
+        .step h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+        .step p { color: #6e6e73; font-size: 14px; }
+        
+        /* Pricing */
+        .pricing { padding: 120px 0; background: #f5f5f7; }
+        .pricing-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 24px; 
+            margin-top: 60px; 
+        }
+        .pricing-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .pricing-card.popular { border-color: #667eea; transform: scale(1.05); }
+        .pricing-card h3 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+        .pricing-price { font-size: 48px; font-weight: 700; margin: 16px 0; }
+        .pricing-price span { font-size: 16px; font-weight: 400; color: #6e6e73; }
+        .pricing-features { text-align: left; margin: 24px 0; }
+        .pricing-features li { padding: 8px 0; display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        .pricing-features li::before { content: '✓'; color: #34c759; font-weight: 600; }
+        
+        /* CTA */
+        .cta { 
+            padding: 120px 0; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        .cta h2 { font-size: 40px; font-weight: 700; margin-bottom: 16px; }
+        .cta p { font-size: 18px; opacity: 0.9; margin-bottom: 40px; }
+        
+        /* Footer */
+        footer { padding: 40px 0; text-align: center; color: #6e6e73; font-size: 14px; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 36px; }
+            .hero p { font-size: 16px; }
+            .hero-buttons { flex-direction: column; }
+            .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Sube tus facturas.<br>La IA las organiza.</h1>
+                <p>Olvídate de cajones y carpetas. Toma una foto de tu factura y BillSnap la lee, organiza y contabiliza automáticamente.</p>
+                <div class="hero-buttons">
+                    <a href="/app" class="btn-primary">
+                        Empezar gratis
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                    <a href="#how-it-works" class="btn-secondary">
+                        Ver cómo funciona
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+        <div class="container">
+            <div style="text-align: center;">
+                <h2 style="font-size: 40px; font-weight: 700; margin-bottom: 16px;">Todo lo que necesitas</h2>
+                <p style="font-size: 18px; color: #6e6e73; max-width: 600px; margin: 0 auto;">BillSnap hace el trabajo tedioso por ti. Solo sube tus facturas y deja que la IA haga el resto.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📸</div>
+                    <h3>Sube fotos</h3>
+                    <p>Toma una foto de tu factura o sube un PDF. La IA lee todos los datos automáticamente.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>IA que razona</h3>
+                    <p>No es OCR básico. La IA entiende qué es cada dato y lo clasifica correctamente.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Contabilidad automática</h3>
+                    <p>Separa ingresos de gastos, calcula IVA, y tiene todo listo para tu gestor.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Informes al instante</h3>
+                    <p>Genera informes PDF trimestrales, anuales, o de cualquier periodo con un clic.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏷️</div>
+                    <h3>Categorización inteligente</h3>
+                    <p>La IA categoriza automáticamente: luz, teléfono, material, servicios, etc.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>100% privado</h3>
+                    <p>Tus datos se quedan en tu dispositivo. Sin servidores externos, sin sorpresas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <div style="text-align: center;">
+                <h2 style="font-size: 40px; font-weight: 700; margin-bottom: 16px;">¿Cómo funciona?</h2>
+                <p style="font-size: 18px; color: #6e6e73; max-width: 600px; margin: 0 auto;">Tres simples pasos para tener tu contabilidad al día.</p>
+            </div>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Sube tu factura</h3>
+                    <p>Toma una foto, sube un PDF o arrastra documentos. Acepta hasta 30 archivos a la vez.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>La IA la procesa</h3>
+                    <p>La IA lee, extrae datos y clasifica automáticamente como ingreso o gasto.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Tienes tu contabilidad</h3>
+                    <p>Dashboard con ingresos, gastos, IVA. Informes listos para tu gestor o Hacienda.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div style="text-align: center;">
+                <h2 style="font-size: 40px; font-weight: 700; margin-bottom: 16px;">Precios simples</h2>
+                <p style="font-size: 18px; color: #6e6e73; max-width: 600px; margin: 0 auto;">Empieza gratis. Escala cuando necesites.</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Free</h3>
+                    <div class="pricing-price">0€ <span>/mes</span></div>
+                    <ul class="pricing-features">
+                        <li>25 facturas/mes</li>
+                        <li>OCR básico</li>
+                        <li>Tabla organizada</li>
+                        <li>Exportar CSV</li>
+                    </ul>
+                    <a href="/app" class="btn-primary" style="width: 100%; justify-content: center;">Empezar gratis</a>
+                </div>
+                <div class="pricing-card popular">
+                    <h3>Autónomo</h3>
+                    <div class="pricing-price">9€ <span>/mes</span></div>
+                    <ul class="pricing-features">
+                        <li>200 facturas/mes</li>
+                        <li>IA en navegador</li>
+                        <li>Informes PDF</li>
+                        <li>Categorías ilimitadas</li>
+                        <li>Dashboard completo</li>
+                    </ul>
+                    <a href="/app" class="btn-primary" style="width: 100%; justify-content: center;">Elegir plan</a>
+                </div>
+                <div class="pricing-card">
+                    <h3>PYME</h3>
+                    <div class="pricing-price">19€ <span>/mes</span></div>
+                    <ul class="pricing-features">
+                        <li>1,000 facturas/mes</li>
+                        <li>Vision AI (Ollama)</li>
+                        <li>3 usuarios</li>
+                        <li>Multi-empresa</li>
+                        <li>Soporte prioritario</li>
+                    </ul>
+                    <a href="/app" class="btn-primary" style="width: 100%; justify-content: center;">Elegir plan</a>
+                </div>
+                <div class="pricing-card">
+                    <h3>Gestoría</h3>
+                    <div class="pricing-price">49€ <span>/mes</span></div>
+                    <ul class="pricing-features">
+                        <li>5,000 facturas/mes</li>
+                        <li>10 usuarios</li>
+                        <li>20 empresas</li>
+                        <li>API externa</li>
+                        <li>Soporte dedicado</li>
+                    </ul>
+                    <a href="/app" class="btn-primary" style="width: 100%; justify-content: center;">Elegir plan</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <div class="container">
+            <h2>¿Listo para organizar tus facturas?</h2>
+            <p>Empieza gratis hoy. Sin tarjeta. Sin compromiso.</p>
+            <a href="/app" class="btn-primary">
+                Empezar ahora
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>© 2026 BillSnap. Todos los derechos reservados.</p>
+            <p style="margin-top: 8px;">
+                <a href="/app" style="color: #667eea; text-decoration: none;">App</a> · 
+                <a href="#pricing" style="color: #667eea; text-decoration: none;">Precios</a> · 
+                <a href="#" style="color: #667eea; text-decoration: none;">Contacto</a>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

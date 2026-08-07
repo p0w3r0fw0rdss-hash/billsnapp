@@ -1,43 +1,50 @@
-// FacturApp Service Worker
-const CACHE_NAME = 'facturapp-v1';
-const urlsToCache = [
+// BillSnap Service Worker - v2
+const CACHE_NAME = 'billsnap-v2';
+const STATIC_ASSETS = [
     '/',
     '/index.html',
+    '/landing.html',
     '/manifest.json'
 ];
 
-// Install event
+// Install
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => cache.addAll(urlsToCache))
+        caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
     );
+    self.skipWaiting();
 });
 
-// Fetch event
-self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request)
-            .then((response) => {
-                if (response) {
-                    return response;
-                }
-                return fetch(event.request);
-            })
-    );
-});
-
-// Activate event
+// Activate
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
+        caches.keys().then((keys) => {
             return Promise.all(
-                cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
-                        return caches.delete(cacheName);
-                    }
-                })
+                keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
             );
         })
+    );
+    self.clients.claim();
+});
+
+// Fetch - Network first, fallback to cache
+self.addEventListener('fetch', (event) => {
+    // Skip non-GET requests
+    if (event.request.method !== 'GET') return;
+
+    event.respondWith(
+        fetch(event.request)
+            .then((response) => {
+                // Clone and cache successful responses
+                if (response.ok) {
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+                }
+                return response;
+            })
+            .catch(() => {
+                // Fallback to cache
+                return caches.match(event.request);
+            })
     );
 });

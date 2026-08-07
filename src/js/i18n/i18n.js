@@ -76,7 +76,7 @@ const i18n = {
             'ocr.tesseract': 'Tesseract.js',
             'ocr.ollama': 'Ollama',
             'ocr.api': 'API Externa',
-            'ocr.native': 'IA Nativa',
+            'ocr.native': 'Nativo',
             'ocr.precision': 'Precisión',
 
             // Invoices
@@ -254,7 +254,7 @@ const i18n = {
             'ocr.tesseract': 'Tesseract.js',
             'ocr.ollama': 'Ollama',
             'ocr.api': 'External API',
-            'ocr.native': 'Native AI',
+            'ocr.native': 'Native',
             'ocr.precision': 'Accuracy',
 
             'invoices.title': 'Invoices',

@@ -118,12 +118,12 @@ const app = {
         const isEs = i18n.getLang() === 'es';
         
         if (this.aiEngines.ollama || this.aiEngines.visionai) {
-            return isEs ? '🧠 Vision AI lista' : '🧠 Vision AI ready';
+            return isEs ? '✅ Motor avanzado listo' : '✅ Advanced engine ready';
         }
         if (this.aiEngines.webllm) {
-            return isEs ? '⚡ WebLLM disponible' : '⚡ WebLLM available';
+            return isEs ? '⚡ Motor rápido disponible' : '⚡ Fast engine available';
         }
-        return isEs ? '💡 Configura IA en Ajustes' : '💡 Configure AI in Settings';
+        return isEs ? '💡 Configura motor en Ajustes' : '💡 Configure engine in Settings';
     },
 
     /**
@@ -136,10 +136,10 @@ const app = {
             if (memory >= 4) {
                 console.log('Pre-loading native AI...');
                 await NativeAI.init('auto');
-                console.log('Native AI ready');
+                console.log('Native ready');
             }
         } catch (error) {
-            console.log('Native AI pre-load skipped:', error.message);
+            console.log('Native pre-load skipped:', error.message);
         }
     },
 
@@ -177,8 +177,8 @@ const app = {
             <div class="login-container">
                 <div class="login-card animate-in">
                     <div class="login-logo">
-                        <div style="width: 72px; height: 72px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                            <img src="public/icons/logo.png" alt="BillSnap" style="width: 56px; height: 56px; object-fit: contain;">
+                        <div style="width: 64px; height: 64px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                            <img src="public/icons/logo.png" alt="BillSnap" style="width: 60px; height: 60px; object-fit: contain;">
                         </div>
                     </div>
                     <h1 class="login-title">BillSnap</h1>
@@ -242,7 +242,7 @@ const app = {
             <aside class="sidebar ${this.sidebarOpen ? 'open' : ''}" id="sidebar">
                 <div class="sidebar-header">
                     <div class="sidebar-logo">
-                        <div style="width: 44px; height: 44px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="width: 38px; height: 38px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                             <img src="public/icons/logo.png" alt="BillSnap" style="width: 34px; height: 34px; object-fit: contain;">
                         </div>
                         <span class="sidebar-logo-text">BillSnap</span>
@@ -632,7 +632,7 @@ const app = {
                 <!-- AI Engine Selection -->
                 <div class="card" style="margin-bottom: 24px; border: ${visionReady ? '2px solid var(--accent-green)' : '1px solid var(--border-secondary)'};">
                     <div class="card-header">
-                        <span class="card-title">${isEs ? 'Motor de IA' : 'AI Engine'}</span>
+                        <span class="card-title">${isEs ? 'Motor de procesamiento' : 'Processing engine'}</span>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             ${visionReady ? 
                                 `<span class="badge badge-green">${isEs ? '✅ Conectado' : '✅ Connected'}</span>` :
@@ -645,12 +645,12 @@ const app = {
                             <!-- Setup Instructions -->
                             <div style="background: var(--accent-blue-light); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
                                 <h4 style="font-weight: 600; margin-bottom: 8px;">
-                                    ${isEs ? '🚀 Configura IA para empezar' : '🚀 Setup AI to get started'}
+                                    ${isEs ? '🚀 Configura el motor para empezar' : '🚀 Setup the engine to get started'}
                                 </h4>
                                 <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">
                                     ${isEs ? 
-                                        'BillSnap usa modelos de IA que RAZONAN sobre tus facturas. Sin entrenar, sin complicaciones.' :
-                                        'BillSnap uses AI models that REASON about your invoices. No training, no complications.'
+                                        'BillSnap procesa tus facturas automáticamente. Sin configurar, sin complicaciones.' :
+                                        'BillSnap processes your invoices automatically. No setup, no complications.'
                                     }
                                 </p>
                                 
@@ -688,7 +688,7 @@ const app = {
                             <label class="ocr-option" style="${!visionReady ? 'opacity: 0.5; pointer-events: none;' : ''}">
                                 <input type="radio" name="ocr-engine" value="vision_ai" ${visionReady ? 'checked' : ''} ${!visionReady ? 'disabled' : ''}>
                                 <div class="ocr-option-card" style="${visionReady ? 'border-color: var(--accent-green); background: var(--accent-green-light);' : ''}">
-                                    <div class="ocr-option-name">🧠 Vision AI</div>
+                                    <div class="ocr-option-name">⚡ Motor avanzado</div>
                                     <div class="ocr-option-desc">${isEs ? 'Razona sobre el documento' : 'Reasons about the document'}</div>
                                     <div class="ocr-option-accuracy">⭐⭐⭐⭐⭐ ${isEs ? 'La mejor precisión' : 'Best accuracy'}</div>
                                 </div>
@@ -704,10 +704,10 @@ const app = {
                             <label class="ocr-option" style="${!plan.ocrEngines.includes('native') ? 'opacity: 0.5; pointer-events: none;' : ''}">
                                 <input type="radio" name="ocr-engine" value="native" ${!plan.ocrEngines.includes('native') ? 'disabled' : ''}>
                                 <div class="ocr-option-card">
-                                    <div class="ocr-option-name">⚡ ${isEs ? 'IA Nativa' : 'Native AI'}
+                                    <div class="ocr-option-name">⚡ ${isEs ? 'Nativo' : 'Native'}
                                         ${!plan.ocrEngines.includes('native') ? `<span style="font-size: 11px; color: var(--accent-orange);"> 🔒</span>` : ''}
                                     </div>
-                                    <div class="ocr-option-desc">${isEs ? 'IA en el navegador' : 'Browser-based AI'}</div>
+                                    <div class="ocr-option-desc">${isEs ? 'Procesamiento en navegador' : 'Browser processing'}</div>
                                     <div class="ocr-option-accuracy">⭐⭐⭐⭐ ${isEs ? 'Buena precisión' : 'Good accuracy'}</div>
                                 </div>
                             </label>
@@ -715,10 +715,10 @@ const app = {
 
                         ${visionReady ? `
                             <div style="margin-top: 12px; padding: 12px; background: var(--accent-green-light); border-radius: 8px; font-size: 13px;">
-                                ✅ <strong>${isEs ? 'Vision AI activa' : 'Vision AI active'}</strong> - 
+                                ✅ <strong>${isEs ? 'Vision AI activa' : 'Motor avanzado activo'}</strong> - 
                                 ${isEs ? 
-                                    'Sube una factura y la IA extraerá todos los datos automáticamente. Sin entrenar, sin complicaciones.' :
-                                    'Upload an invoice and the AI will extract all data automatically. No training, no complications.'
+                                    'Sube una factura y el sistema extraerá todos los datos automáticamente.' :
+                                    'Upload an invoice and the system will extract all data automatically.'
                                 }
                             </div>
                         ` : ''}
@@ -929,7 +929,7 @@ const app = {
                     // WebLLM - AI in browser, no install needed
                     result = await WebLLMAI.processInvoice(base64);
                 } else if (selectedEngine === 'native') {
-                    // Native AI (browser-based OCR)
+                    // Native (browser-based OCR)
                     result = await NativeAI.processInvoice(base64);
                 } else if (selectedEngine === 'tesseract') {
                     // Basic OCR fallback
@@ -1640,10 +1640,10 @@ const app = {
                         </div>
                     </div>
 
-                    <!-- AI Configuration -->
+                    <!-- Engine Configuration -->
                     <div class="card">
                         <div class="card-header">
-                            <span class="card-title">${isEs ? 'Configuración IA' : 'AI Configuration'}</span>
+                            <span class="card-title">${isEs ? 'Configuración del motor' : 'Engine Configuration'}</span>
                             <span class="badge ${VisionAI.isAvailable() ? 'badge-green' : 'badge-orange'}">
                                 ${VisionAI.isAvailable() ? (isEs ? 'Conectado' : 'Connected') : (isEs ? 'No conectado' : 'Not connected')}
                             </span>
@@ -1651,11 +1651,11 @@ const app = {
                         <div class="card-body">
                             <!-- Vision AI Status -->
                             <div style="background: var(--bg-secondary); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-                                <h4 style="font-weight: 600; margin-bottom: 8px;">🧠 ${isEs ? 'Vision AI (Recomendado)' : 'Vision AI (Recommended)'}</h4>
+                                <h4 style="font-weight: 600; margin-bottom: 8px;">🧠 ${isEs ? 'Motor avanzado (Recomendado)' : 'Advanced engine (Recommended)'}</h4>
                                 <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
                                     ${isEs ? 
-                                        'Usa modelos de IA que razonan sobre tus facturas. Sin entrenar, sin complicaciones.' :
-                                        'Uses AI models that reason about your invoices. No training, no complications.'
+                                        'Procesa tus facturas automáticamente. Sin configurar, sin complicaciones.' :
+                                        'Processes your invoices automatically. No setup, no complications.'
                                     }
                                 </p>
                                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">

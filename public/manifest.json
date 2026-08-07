@@ -1,11 +1,11 @@
 {
-    "name": "FacturApp - Gestión Inteligente de Facturas",
-    "short_name": "FacturApp",
-    "description": "App de facturación con OCR inteligente. Sube fotos de facturas y extrae datos automáticamente.",
+    "name": "BillSnap - Smart Invoicing with AI",
+    "short_name": "BillSnap",
+    "description": "Professional invoice management with AI-powered OCR. Upload photos, extract data automatically.",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#2563eb",
+    "background_color": "#000000",
+    "theme_color": "#0071e3",
     "orientation": "any",
     "icons": [
         {

@@ -38,9 +38,15 @@ const app = {
                 return;
             }
 
+            // Initialize billing
+            await Billing.init();
+
             // Load configurations
             await AIAPI.loadConfig();
             await GoogleSheets.loadConfig();
+
+            // Pre-load native AI in background
+            this.preloadNativeAI();
 
             // Render main app
             this.renderApp();
@@ -56,6 +62,23 @@ const app = {
         } catch (error) {
             console.error('Error initializing app:', error);
             this.showToast('Error initializing application', 'error');
+        }
+    },
+
+    /**
+     * Pre-load native AI in background
+     */
+    async preloadNativeAI() {
+        try {
+            // Check if device supports native AI
+            const memory = navigator.deviceMemory || 4;
+            if (memory >= 4) {
+                console.log('Pre-loading native AI...');
+                await NativeAI.init('auto');
+                console.log('Native AI ready');
+            }
+        } catch (error) {
+            console.log('Native AI pre-load skipped:', error.message);
         }
     },
 
@@ -93,13 +116,7 @@ const app = {
             <div class="login-container">
                 <div class="login-card animate-in">
                     <div class="login-logo">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <polyline points="10 9 9 9 8 9"></polyline>
-                        </svg>
+                        <img src="/public/icons/logo.png" alt="BillSnap" style="width: 56px; height: 56px; object-fit: contain;">
                     </div>
                     <h1 class="login-title">BillSnap</h1>
                     <p class="login-subtitle">${i18n.t('app.tagline')}</p>
@@ -107,7 +124,7 @@ const app = {
                     <form id="login-form" onsubmit="app.handleLogin(event)">
                         <div class="form-group">
                             <label class="form-label">${i18n.t('auth.username')}</label>
-                            <input type="text" id="login-username" class="form-input" placeholder="${i18n.t('auth.username')}" required>
+                            <input type="text" id="login-username" class="form-input" placeholder="${i18n.t('auth.username')}" required autofocus>
                         </div>
                         <div class="form-group">
                             <label class="form-label">${i18n.t('auth.password')}</label>
@@ -162,14 +179,7 @@ const app = {
             <aside class="sidebar ${this.sidebarOpen ? 'open' : ''}" id="sidebar">
                 <div class="sidebar-header">
                     <div class="sidebar-logo">
-                        <div class="sidebar-logo-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                <line x1="16" y1="17" x2="8" y2="17"></line>
-                            </svg>
-                        </div>
+                        <img src="/public/icons/logo.png" alt="BillSnap" style="width: 36px; height: 36px; object-fit: contain;">
                         <span class="sidebar-logo-text">BillSnap</span>
                     </div>
                 </div>
@@ -189,6 +199,7 @@ const app = {
 
                     <div class="nav-section">
                         <div class="nav-section-title">${i18n.getLang() === 'es' ? 'Sistema' : 'System'}</div>
+                        ${this.renderNavItem('pricing', i18n.getLang() === 'es' ? 'Planes' : 'Pricing', 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z')}
                         ${this.renderNavItem('settings', i18n.t('nav.settings'), 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z')}
                     </div>
                 </nav>
@@ -300,13 +311,16 @@ const app = {
                 this.renderDashboard(contentArea);
                 break;
             case 'upload':
-                this.renderUpload(contentArea);
+                await this.renderUpload(contentArea);
                 break;
             case 'invoices':
                 this.renderInvoices(contentArea);
                 break;
             case 'reports':
                 this.renderReports(contentArea);
+                break;
+            case 'pricing':
+                contentArea.innerHTML = Billing.renderPricingPage(i18n.getLang());
                 break;
             case 'settings':
                 this.renderSettings(contentArea);
@@ -539,7 +553,11 @@ const app = {
     /**
      * Render Upload section
      */
-    renderUpload(container) {
+    async renderUpload(container) {
+        const plan = Billing.getCurrentPlan();
+        const isEs = i18n.getLang() === 'es';
+        const nativeReady = NativeAI.isAvailable();
+        
         container.innerHTML = `
             <div class="animate-in">
                 <div class="page-header">
@@ -547,10 +565,14 @@ const app = {
                     <p class="page-subtitle">${i18n.t('app.description')}</p>
                 </div>
 
+                <!-- Usage Indicator -->
+                ${await Billing.renderUsageIndicator()}
+
                 <!-- OCR Engine Selection -->
                 <div class="card" style="margin-bottom: 24px;">
                     <div class="card-header">
                         <span class="card-title">${i18n.t('upload.ocr_engine')}</span>
+                        <span class="badge badge-blue">${isEs ? 'Plan' : 'Plan'}: ${plan.name}</span>
                     </div>
                     <div class="card-body">
                         <div class="ocr-selector">
@@ -562,31 +584,47 @@ const app = {
                                     <div class="ocr-option-accuracy">⭐⭐⭐ ${i18n.t('ocr.precision')}</div>
                                 </div>
                             </label>
-                            <label class="ocr-option">
-                                <input type="radio" name="ocr-engine" value="ollama">
+                            <label class="ocr-option" style="${!plan.ocrEngines.includes('native') ? 'opacity: 0.5; pointer-events: none;' : ''}">
+                                <input type="radio" name="ocr-engine" value="native" ${!plan.ocrEngines.includes('native') ? 'disabled' : ''}>
                                 <div class="ocr-option-card">
-                                    <div class="ocr-option-name">${i18n.t('ocr.ollama')}</div>
-                                    <div class="ocr-option-desc">${i18n.t('upload.ocr_gpu')}</div>
+                                    <div class="ocr-option-name">
+                                        ${i18n.t('ocr.native')}
+                                        ${!plan.ocrEngines.includes('native') ? `<span style="font-size: 11px; color: var(--accent-orange);"> 🔒</span>` : ''}
+                                    </div>
+                                    <div class="ocr-option-desc">${nativeReady ? (isEs ? 'IA en navegador, sin API' : 'Browser AI, no API') : i18n.t('upload.ocr_native')}</div>
                                     <div class="ocr-option-accuracy">⭐⭐⭐⭐ ${i18n.t('ocr.precision')}</div>
                                 </div>
                             </label>
-                            <label class="ocr-option">
-                                <input type="radio" name="ocr-engine" value="api">
+                            <label class="ocr-option" style="${!plan.ocrEngines.includes('api') ? 'opacity: 0.5; pointer-events: none;' : ''}">
+                                <input type="radio" name="ocr-engine" value="api" ${!plan.ocrEngines.includes('api') ? 'disabled' : ''}>
                                 <div class="ocr-option-card">
-                                    <div class="ocr-option-name">${i18n.t('ocr.api')}</div>
+                                    <div class="ocr-option-name">
+                                        ${i18n.t('ocr.api')}
+                                        ${!plan.ocrEngines.includes('api') ? `<span style="font-size: 11px; color: var(--accent-orange);"> 🔒</span>` : ''}
+                                    </div>
                                     <div class="ocr-option-desc">${i18n.t('upload.ocr_api')}</div>
                                     <div class="ocr-option-accuracy">⭐⭐⭐⭐⭐ ${i18n.t('ocr.precision')}</div>
                                 </div>
                             </label>
-                            <label class="ocr-option">
-                                <input type="radio" name="ocr-engine" value="native">
+                            <label class="ocr-option" style="${!plan.ocrEngines.includes('ollama') ? 'opacity: 0.5; pointer-events: none;' : ''}">
+                                <input type="radio" name="ocr-engine" value="ollama" ${!plan.ocrEngines.includes('ollama') ? 'disabled' : ''}>
                                 <div class="ocr-option-card">
-                                    <div class="ocr-option-name">${i18n.t('ocr.native')}</div>
-                                    <div class="ocr-option-desc">${i18n.t('upload.ocr_native')}</div>
-                                    <div class="ocr-option-accuracy">⭐⭐⭐⭐⭐ ${i18n.t('ocr.precision')}</div>
+                                    <div class="ocr-option-name">
+                                        ${i18n.t('ocr.ollama')}
+                                        ${!plan.ocrEngines.includes('ollama') ? `<span style="font-size: 11px; color: var(--accent-orange);"> 🔒</span>` : ''}
+                                    </div>
+                                    <div class="ocr-option-desc">${i18n.t('upload.ocr_gpu')}</div>
+                                    <div class="ocr-option-accuracy">⭐⭐⭐⭐ ${i18n.t('ocr.precision')}</div>
                                 </div>
                             </label>
                         </div>
+                        ${!plan.ocrEngines.includes('native') || !plan.ocrEngines.includes('api') ? `
+                            <div style="margin-top: 12px; padding: 12px; background: var(--accent-blue-light); border-radius: 8px; font-size: 13px; color: var(--accent-blue);">
+                                ${isEs ? '💡 Desbloquea motores de IA más precisos mejorando tu plan' : 
+                                         '💡 Unlock more accurate AI engines by upgrading your plan'}
+                                <a href="#" onclick="app.showSection('pricing'); return false;" style="font-weight: 600; text-decoration: underline;"> ${isEs ? 'Ver planes' : 'View plans'}</a>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
 
@@ -746,11 +784,34 @@ const app = {
      */
     async processQueue() {
         if (this.processingInProgress) return;
+
+        // Check billing limits
+        const canProcess = await Billing.canProcessInvoice();
+        const pendingCount = this.uploadQueue.filter(i => i.status === 'pending').length;
+        
+        if (!canProcess.allowed || (canProcess.remaining !== -1 && pendingCount > canProcess.remaining)) {
+            Billing.checkAndPromptUpgrade();
+            return;
+        }
+
         this.processingInProgress = true;
 
         const selectedEngine = document.querySelector('input[name="ocr-engine"]:checked')?.value || 'tesseract';
+        
+        // Check if engine is available for current plan
+        if (!Billing.isEngineAvailable(selectedEngine)) {
+            this.showToast(
+                i18n.getLang() === 'es' ? 
+                    `Motor ${selectedEngine} no disponible en tu plan actual` :
+                    `Engine ${selectedEngine} not available in your current plan`, 
+                'error'
+            );
+            this.processingInProgress = false;
+            return;
+        }
+
         let processed = 0;
-        const total = this.uploadQueue.filter(i => i.status === 'pending').length;
+        const total = pendingCount;
 
         for (const item of this.uploadQueue) {
             if (item.status !== 'pending') continue;
@@ -764,12 +825,19 @@ const app = {
                 item.progress = 30;
 
                 let result;
-                if (selectedEngine === 'tesseract') {
+                if (selectedEngine === 'native') {
+                    // Use native AI (browser-based)
+                    result = await NativeAI.processInvoice(base64);
+                } else if (selectedEngine === 'tesseract') {
                     result = await TesseractOCR.processInvoice(base64);
                 } else {
+                    // External APIs (OpenAI, Gemini, HuggingFace, Ollama)
                     const base64Data = base64.split(',')[1];
                     result = await AIAPI.processInvoice(base64Data, selectedEngine);
                 }
+
+                // Record usage
+                await Billing.recordInvoiceProcessed();
 
                 item.progress = 90;
                 item.result = result;

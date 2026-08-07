@@ -1,15 +1,17 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FacturApp - Gestión Inteligente de Facturas</title>
-    <meta name="description" content="App de facturación con OCR inteligente. Sube fotos de facturas y extrae datos automáticamente.">
-    <meta name="theme-color" content="#2563eb">
+    <title>BillSnap - Smart Invoicing with AI</title>
+    <meta name="description" content="Professional invoice management with AI-powered OCR. Upload photos, extract data automatically.">
+    <meta name="theme-color" content="#000000">
     <link rel="manifest" href="/manifest.json">
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font (Professional, clean) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Tesseract.js for OCR -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -21,911 +23,1079 @@
     <!-- Chart.js for dashboard -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            200: '#bfdbfe',
-                            300: '#93c5fd',
-                            400: '#60a5fa',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#1e3a8a',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    
     <style>
-        /* Custom styles */
-        .drop-zone {
-            transition: all 0.3s ease;
+        /* ============================================
+           BillSnap Design System
+           Inspired by Apple, Linear, Vercel
+           ============================================ */
+        
+        :root {
+            /* Colors - Light Mode */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f7;
+            --bg-tertiary: #e8e8ed;
+            --bg-hover: #f0f0f2;
+            --bg-active: #e5e5ea;
+            
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --text-tertiary: #86868b;
+            --text-inverse: #ffffff;
+            
+            --accent-blue: #0071e3;
+            --accent-blue-hover: #0077ed;
+            --accent-blue-light: #e1f0ff;
+            --accent-green: #34c759;
+            --accent-green-light: #e8faf0;
+            --accent-orange: #ff9500;
+            --accent-orange-light: #fff4e6;
+            --accent-red: #ff3b30;
+            --accent-red-light: #ffe5e5;
+            --accent-purple: #af52de;
+            --accent-purple-light: #f3e8ff;
+            
+            --border-primary: #d2d2d7;
+            --border-secondary: #e5e5ea;
+            
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+            --shadow-xl: 0 20px 60px rgba(0,0,0,0.15);
+            
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .drop-zone.drag-over {
-            border-color: #3b82f6;
-            background-color: #eff6ff;
-            transform: scale(1.02);
+
+        .dark {
+            --bg-primary: #000000;
+            --bg-secondary: #1c1c1e;
+            --bg-tertiary: #2c2c2e;
+            --bg-hover: #2c2c2e;
+            --bg-active: #3a3a3c;
+            
+            --text-primary: #f5f5f7;
+            --text-secondary: #a1a1a6;
+            --text-tertiary: #86868b;
+            --text-inverse: #000000;
+            
+            --accent-blue: #0a84ff;
+            --accent-blue-hover: #409cff;
+            --accent-blue-light: #0a84ff20;
+            --accent-green: #30d158;
+            --accent-green-light: #30d15820;
+            --accent-orange: #ff9f0a;
+            --accent-orange-light: #ff9f0a20;
+            --accent-red: #ff453a;
+            --accent-red-light: #ff453a20;
+            --accent-purple: #bf5af2;
+            --accent-purple-light: #bf5af220;
+            
+            --border-primary: #38383a;
+            --border-secondary: #2c2c2e;
+            
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.4);
+            --shadow-xl: 0 20px 60px rgba(0,0,0,0.5);
         }
-        .progress-bar {
-            transition: width 0.3s ease;
+
+        /* ============================================
+           Base Styles
+           ============================================ */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
+
+        /* ============================================
+           Animations
+           ============================================ */
+        
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .pulse {
-            animation: pulse 2s infinite;
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-16px); }
+            to { opacity: 1; transform: translateX(0); }
         }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .animate-slide {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        /* ============================================
+           Layout
+           ============================================ */
         
-        /* Table styles */
+        .app-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border-secondary);
+            display: flex;
+            flex-direction: column;
+            transition: transform var(--transition-normal);
+            z-index: 40;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-blue), #5856d6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-logo-text {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+        }
+
+        .nav-section {
+            margin-bottom: 8px;
+        }
+
+        .nav-section-title {
+            padding: 8px 12px 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-tertiary);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-blue-light);
+            color: var(--accent-blue);
+        }
+
+        .nav-item-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.7;
+        }
+
+        .nav-item.active .nav-item-icon {
+            opacity: 1;
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border-secondary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .user-info:hover {
+            background: var(--bg-hover);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), #5856d6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .top-bar {
+            height: 56px;
+            padding: 0 24px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .menu-toggle {
+            display: none;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .menu-toggle:hover {
+            background: var(--bg-hover);
+        }
+
+        .search-bar {
+            position: relative;
+            width: 320px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            background: var(--bg-secondary);
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+            font-family: var(--font-family);
+        }
+
+        .search-input:focus {
+            outline: none;
+            background: var(--bg-primary);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px var(--accent-blue-light);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+            width: 16px;
+            height: 16px;
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: var(--font-family);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-blue-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,113,227,0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .btn-ghost:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .btn-danger {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff453a;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .btn-lg {
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: var(--bg-secondary);
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .page-subtitle {
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-secondary);
+            overflow: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-secondary);
+            background: var(--bg-secondary);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            border: 1px solid var(--border-secondary);
+            transition: all var(--transition-normal);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -1px;
+        }
+
+        .stat-change {
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .stat-change.positive {
+            color: var(--accent-green);
+        }
+
+        .stat-change.negative {
+            color: var(--accent-red);
+        }
+
+        /* Tables */
         .table-container {
             overflow-x: auto;
         }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg-secondary);
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-secondary);
+            white-space: nowrap;
+        }
+
+        th.right {
+            text-align: right;
+        }
+
+        td {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        tr {
+            transition: background var(--transition-fast);
+        }
+
+        tbody tr:hover {
+            background: var(--bg-hover);
+        }
+
+        .editable-cell {
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background var(--transition-fast);
+        }
+
         .editable-cell:hover {
-            background-color: #f3f4f6;
+            background: var(--accent-blue-light);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-blue {
+            background: var(--accent-blue-light);
+            color: var(--accent-blue);
+        }
+
+        .badge-green {
+            background: var(--accent-green-light);
+            color: var(--accent-green);
+        }
+
+        .badge-orange {
+            background: var(--accent-orange-light);
+            color: var(--accent-orange);
+        }
+
+        .badge-red {
+            background: var(--accent-red-light);
+            color: var(--accent-red);
+        }
+
+        .badge-purple {
+            background: var(--accent-purple-light);
+            color: var(--accent-purple);
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed var(--border-primary);
+            border-radius: var(--radius-xl);
+            padding: 48px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            background: var(--bg-primary);
+        }
+
+        .drop-zone:hover,
+        .drop-zone.drag-over {
+            border-color: var(--accent-blue);
+            background: var(--accent-blue-light);
+            transform: scale(1.01);
+        }
+
+        .drop-zone-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            color: var(--text-tertiary);
+        }
+
+        .drop-zone-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .drop-zone-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        /* OCR Engine Selector */
+        .ocr-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .ocr-option {
+            position: relative;
             cursor: pointer;
         }
-        .editable-cell input {
-            width: 100%;
-            padding: 2px 4px;
-            border: 1px solid #3b82f6;
-            border-radius: 4px;
-            outline: none;
+
+        .ocr-option input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
         }
-        
-        /* Toast notifications */
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 12px 24px;
-            border-radius: 8px;
-            color: white;
+
+        .ocr-option-card {
+            padding: 16px;
+            border: 2px solid var(--border-secondary);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+            background: var(--bg-primary);
+        }
+
+        .ocr-option input:checked + .ocr-option-card {
+            border-color: var(--accent-blue);
+            background: var(--accent-blue-light);
+        }
+
+        .ocr-option-card:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .ocr-option-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .ocr-option-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .ocr-option-accuracy {
+            font-size: 12px;
+            color: var(--accent-orange);
+            margin-top: 8px;
+        }
+
+        /* Progress */
+        .progress-bar {
+            height: 4px;
+            background: var(--bg-tertiary);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-blue);
+            border-radius: 2px;
+            transition: width var(--transition-normal);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
             font-weight: 500;
-            z-index: 1000;
-            transform: translateX(120%);
-            transition: transform 0.3s ease;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
         }
-        .toast.show {
-            transform: translateX(0);
+
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-secondary);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            transition: all var(--transition-fast);
         }
-        .toast.success { background-color: #10b981; }
-        .toast.error { background-color: #ef4444; }
-        .toast.info { background-color: #3b82f6; }
-        
-        /* Modal */
+
+        .form-input:focus {
+            outline: none;
+            background: var(--bg-primary);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px var(--accent-blue-light);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236e6e73' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+
+        .form-help {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+        }
+
+        /* Modals */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background-color: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
             z-index: 50;
             display: flex;
             align-items: center;
             justify-content: center;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            transition: opacity var(--transition-normal);
         }
+
         .modal-overlay.active {
             opacity: 1;
             pointer-events: all;
         }
-        
-        /* Sidebar */
-        .sidebar {
-            transition: transform 0.3s ease;
+
+        .modal {
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform var(--transition-normal);
         }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-secondary);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 12px 20px;
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            transform: translateX(120%);
+            transition: transform var(--transition-normal);
+            max-width: 360px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-success {
+            border-left: 4px solid var(--accent-green);
+        }
+
+        .toast-error {
+            border-left: 4px solid var(--accent-red);
+        }
+
+        .toast-info {
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        /* Login Screen */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-logo {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent-blue), #5856d6);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .login-subtitle {
+            font-size: 15px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            width: 44px;
+            height: 24px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .dark .theme-toggle {
+            background: var(--accent-blue);
+        }
+
+        .theme-toggle-knob {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform var(--transition-fast);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .dark .theme-toggle-knob {
+            transform: translateX(20px);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .lang-selector:hover {
+            background: var(--bg-hover);
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
                 transform: translateX(-100%);
             }
+
             .sidebar.open {
                 transform: translateX(0);
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .search-bar {
+                width: 200px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .ocr-selector {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ocr-selector {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <!-- App Container -->
-    <div id="app" class="flex h-screen">
-        
-        <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar w-64 bg-white border-r border-gray-200 flex flex-col fixed md:relative z-40 h-full">
-            <!-- Logo -->
-            <div class="p-4 border-b border-gray-200">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="font-bold text-gray-900">FacturApp</h1>
-                        <p class="text-xs text-gray-500">Gestión inteligente</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Navigation -->
-            <nav class="flex-1 p-4 space-y-1">
-                <button onclick="app.showSection('dashboard')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 transition-colors" data-section="dashboard">
-                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                    </svg>
-                    <span class="text-gray-700">Dashboard</span>
-                </button>
-                
-                <button onclick="app.showSection('upload')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 transition-colors" data-section="upload">
-                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                    </svg>
-                    <span class="text-gray-700">Subir Facturas</span>
-                </button>
-                
-                <button onclick="app.showSection('invoices')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 transition-colors" data-section="invoices">
-                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-                    </svg>
-                    <span class="text-gray-700">Facturas</span>
-                </button>
-                
-                <button onclick="app.showSection('reports')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 transition-colors" data-section="reports">
-                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    <span class="text-gray-700">Informes</span>
-                </button>
-                
-                <button onclick="app.showSection('settings')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 transition-colors" data-section="settings">
-                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    <span class="text-gray-700">Configuración</span>
-                </button>
-            </nav>
-            
-            <!-- User Section -->
-            <div class="p-4 border-t border-gray-200">
-                <button onclick="app.showSection('settings')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100">
-                    <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                        <span class="text-primary-600 font-semibold text-sm">U</span>
-                    </div>
-                    <div class="text-left">
-                        <p class="text-sm font-medium text-gray-700">Usuario</p>
-                        <p class="text-xs text-gray-500">Plan Free</p>
-                    </div>
-                </button>
-            </div>
-        </aside>
-        
-        <!-- Main Content -->
-        <main class="flex-1 overflow-auto">
-            <!-- Top Bar -->
-            <header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
-                <button id="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')" class="md:hidden p-2 rounded-lg hover:bg-gray-100">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                </button>
-                
-                <div class="flex items-center gap-4">
-                    <div class="relative">
-                        <input type="text" placeholder="Buscar facturas..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent w-64">
-                        <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
-                    
-                    <button onclick="app.showSection('upload')" class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        <span>Nueva factura</span>
-                    </button>
-                </div>
-            </header>
-            
-            <!-- Content Sections -->
-            <div class="p-6">
-                
-                <!-- DASHBOARD SECTION -->
-                <section id="section-dashboard" class="section hidden">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Dashboard</h2>
-                    
-                    <!-- Stats Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-gray-500">Total Facturas</p>
-                                    <p class="text-2xl font-bold text-gray-900" id="stat-total-invoices">0</p>
-                                </div>
-                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-gray-500">Total Importe</p>
-                                    <p class="text-2xl font-bold text-gray-900" id="stat-total-amount">0,00 €</p>
-                                </div>
-                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-gray-500">IVA Acumulado</p>
-                                    <p class="text-2xl font-bold text-gray-900" id="stat-total-iva">0,00 €</p>
-                                </div>
-                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-gray-500">Facturas Pendientes</p>
-                                    <p class="text-2xl font-bold text-gray-900" id="stat-pending">0</p>
-                                </div>
-                                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Charts Row -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                            <h3 class="font-semibold text-gray-900 mb-4">Ingresos por Mes</h3>
-                            <canvas id="chart-monthly" height="200"></canvas>
-                        </div>
-                        
-                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                            <h3 class="font-semibold text-gray-900 mb-4">Gastos por Categoría</h3>
-                            <canvas id="chart-categories" height="200"></canvas>
-                        </div>
-                    </div>
-                    
-                    <!-- Recent Invoices -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                        <div class="p-6 border-b border-gray-100">
-                            <h3 class="font-semibold text-gray-900">Últimas Facturas</h3>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nº Factura</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Emisor</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="recent-invoices-body" class="divide-y divide-gray-100">
-                                    <tr>
-                                        <td colspan="5" class="px-6 py-8 text-center text-gray-500">
-                                            No hay facturas todavía. ¡Sube tu primera factura!
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-                
-                <!-- UPLOAD SECTION -->
-                <section id="section-upload" class="section">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Subir Facturas</h2>
-                    
-                    <!-- OCR Engine Selection -->
-                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
-                        <h3 class="font-semibold text-gray-900 mb-4">Motor OCR</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <label class="relative cursor-pointer">
-                                <input type="radio" name="ocr-engine" value="tesseract" checked class="peer sr-only">
-                                <div class="border-2 border-gray-200 rounded-xl p-4 peer-checked:border-primary-500 peer-checked:bg-primary-50 transition-all">
-                                    <div class="flex items-center gap-3 mb-2">
-                                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p class="font-medium text-gray-900">Tesseract.js</p>
-                                            <p class="text-xs text-gray-500">Local · Gratis</p>
-                                        </div>
-                                    </div>
-                                    <p class="text-xs text-gray-600">Precisión: ⭐⭐⭐</p>
-                                </div>
-                            </label>
-                            
-                            <label class="relative cursor-pointer">
-                                <input type="radio" name="ocr-engine" value="ollama" class="peer sr-only">
-                                <div class="border-2 border-gray-200 rounded-xl p-4 peer-checked:border-primary-500 peer-checked:bg-primary-50 transition-all">
-                                    <div class="flex items-center gap-3 mb-2">
-                                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p class="font-medium text-gray-900">Ollama</p>
-                                            <p class="text-xs text-gray-500">Local · GPU</p>
-                                        </div>
-                                    </div>
-                                    <p class="text-xs text-gray-600">Precisión: ⭐⭐⭐⭐</p>
-                                </div>
-                            </label>
-                            
-                            <label class="relative cursor-pointer">
-                                <input type="radio" name="ocr-engine" value="api" class="peer sr-only">
-                                <div class="border-2 border-gray-200 rounded-xl p-4 peer-checked:border-primary-500 peer-checked:bg-primary-50 transition-all">
-                                    <div class="flex items-center gap-3 mb-2">
-                                        <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p class="font-medium text-gray-900">API Externa</p>
-                                            <p class="text-xs text-gray-500">Tu API key</p>
-                                        </div>
-                                    </div>
-                                    <p class="text-xs text-gray-600">Precisión: ⭐⭐⭐⭐⭐</p>
-                                </div>
-                            </label>
-                            
-                            <label class="relative cursor-pointer">
-                                <input type="radio" name="ocr-engine" value="native" class="peer sr-only">
-                                <div class="border-2 border-gray-200 rounded-xl p-4 peer-checked:border-primary-500 peer-checked:bg-primary-50 transition-all">
-                                    <div class="flex items-center gap-3 mb-2">
-                                        <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p class="font-medium text-gray-900">IA Nativa</p>
-                                            <p class="text-xs text-gray-500">Premium</p>
-                                        </div>
-                                    </div>
-                                    <p class="text-xs text-gray-600">Precisión: ⭐⭐⭐⭐⭐</p>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <!-- Drop Zone -->
-                    <div id="drop-zone" class="drop-zone bg-white rounded-xl border-2 border-dashed border-gray-300 p-12 text-center cursor-pointer transition-all hover:border-primary-400">
-                        <div class="flex flex-col items-center">
-                            <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
-                            <p class="text-lg font-medium text-gray-700 mb-2">Arrastra hasta 30 facturas aquí</p>
-                            <p class="text-sm text-gray-500 mb-4">JPG, PNG, PDF, HEIC, WebP</p>
-                            <button onclick="document.getElementById('file-input').click()" class="bg-primary-600 text-white px-6 py-2.5 rounded-lg hover:bg-primary-700 transition-colors">
-                                Seleccionar archivos
-                            </button>
-                        </div>
-                        <input type="file" id="file-input" multiple accept="image/*,.pdf" class="hidden">
-                    </div>
-                    
-                    <!-- Upload Queue -->
-                    <div id="upload-queue" class="mt-6 hidden">
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
-                                <h3 class="font-semibold text-gray-900">Cola de procesamiento</h3>
-                                <div class="flex items-center gap-4">
-                                    <span id="queue-progress" class="text-sm text-gray-500">0/0 procesadas</span>
-                                    <button id="process-btn" onclick="app.processQueue()" class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors text-sm">
-                                        Procesar todas
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Overall Progress -->
-                            <div class="px-4 py-3 bg-gray-50">
-                                <div class="flex items-center justify-between mb-1">
-                                    <span class="text-sm text-gray-600">Progreso total</span>
-                                    <span id="overall-percent" class="text-sm font-medium text-primary-600">0%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div id="overall-progress" class="progress-bar bg-primary-600 h-2 rounded-full" style="width: 0%"></div>
-                                </div>
-                            </div>
-                            
-                            <!-- File List -->
-                            <div id="file-list" class="divide-y divide-gray-100 max-h-96 overflow-y-auto">
-                                <!-- Files will be added here dynamically -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Extracted Data Preview -->
-                    <div id="extracted-preview" class="mt-6 hidden">
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
-                                <h3 class="font-semibold text-gray-900">Datos extraídos</h3>
-                                <div class="flex items-center gap-2">
-                                    <button onclick="app.saveExtracted()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm">
-                                        Guardar todas
-                                    </button>
-                                    <button onclick="app.discardExtracted()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors text-sm">
-                                        Descartar
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full">
-                                    <thead class="bg-gray-50">
-                                        <tr>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Preview</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nº Factura</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Emisor</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Base</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">IVA</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="extracted-body" class="divide-y divide-gray-100">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                
-                <!-- INVOICES SECTION -->
-                <section id="section-invoices" class="section hidden">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-2xl font-bold text-gray-900">Facturas</h2>
-                        <div class="flex items-center gap-3">
-                            <select id="filter-year" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                                <option value="">Todos los años</option>
-                            </select>
-                            <select id="filter-month" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                                <option value="">Todos los meses</option>
-                                <option value="01">Enero</option>
-                                <option value="02">Febrero</option>
-                                <option value="03">Marzo</option>
-                                <option value="04">Abril</option>
-                                <option value="05">Mayo</option>
-                                <option value="06">Junio</option>
-                                <option value="07">Julio</option>
-                                <option value="08">Agosto</option>
-                                <option value="09">Septiembre</option>
-                                <option value="10">Octubre</option>
-                                <option value="11">Noviembre</option>
-                                <option value="12">Diciembre</option>
-                            </select>
-                            <button onclick="app.exportCSV()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                                CSV
-                            </button>
-                            <button onclick="app.exportJSON()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                                JSON
-                            </button>
-                            <button onclick="app.generatePDFReport()" class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors text-sm flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                </svg>
-                                PDF
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Invoices Table -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                        <div class="table-container">
-                            <table class="w-full">
-                                <thead class="bg-gray-50 sticky top-0">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                            <input type="checkbox" id="select-all" class="rounded">
-                                        </th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700" onclick="app.sortBy('date')">
-                                            Fecha <span class="sort-icon">↕</span>
-                                        </th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nº Factura</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Emisor</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Receptor</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Concepto</th>
-                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700" onclick="app.sortBy('base')">
-                                            Base <span class="sort-icon">↕</span>
-                                        </th>
-                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">IVA %</th>
-                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">IVA €</th>
-                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700" onclick="app.sortBy('total')">
-                                            Total <span class="sort-icon">↕</span>
-                                        </th>
-                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Estado</th>
-                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="invoices-body" class="divide-y divide-gray-100">
-                                    <tr>
-                                        <td colspan="12" class="px-6 py-12 text-center text-gray-500">
-                                            <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                            </svg>
-                                            <p class="font-medium">No hay facturas</p>
-                                            <p class="text-sm mt-1">Sube tu primera factura para empezar</p>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- Table Footer with Totals -->
-                        <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                            <span id="invoice-count" class="text-sm text-gray-600">0 facturas</span>
-                            <div class="flex items-center gap-6">
-                                <span class="text-sm text-gray-600">Total base: <strong id="total-base">0,00 €</strong></span>
-                                <span class="text-sm text-gray-600">Total IVA: <strong id="total-iva">0,00 €</strong></span>
-                                <span class="text-sm text-gray-900 font-semibold">Total: <strong id="total-amount">0,00 €</strong></span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                
-                <!-- REPORTS SECTION -->
-                <section id="section-reports" class="section hidden">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Informes</h2>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Monthly Report -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                            </div>
-                            <h3 class="font-semibold text-gray-900 mb-2">Informe Mensual</h3>
-                            <p class="text-sm text-gray-600 mb-4">Resumen de todas las facturas del mes seleccionado</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <select id="report-month" class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1">
-                                    <option value="01">Enero</option>
-                                    <option value="02">Febrero</option>
-                                    <option value="03">Marzo</option>
-                                    <option value="04">Abril</option>
-                                    <option value="05">Mayo</option>
-                                    <option value="06">Junio</option>
-                                    <option value="07">Julio</option>
-                                    <option value="08">Agosto</option>
-                                    <option value="09">Septiembre</option>
-                                    <option value="10">Octubre</option>
-                                    <option value="11">Noviembre</option>
-                                    <option value="12">Diciembre</option>
-                                </select>
-                                <select id="report-year" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                                </select>
-                            </div>
-                            <button onclick="app.generateMonthlyReport()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
-                                Generar PDF
-                            </button>
-                        </div>
-                        
-                        <!-- Quarterly Report -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                            </div>
-                            <h3 class="font-semibold text-gray-900 mb-2">Informe Trimestral</h3>
-                            <p class="text-sm text-gray-600 mb-4">Liquidación de IVA (Modelo 303)</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <select id="report-quarter" class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1">
-                                    <option value="1">Q1 (Ene-Mar)</option>
-                                    <option value="2">Q2 (Abr-Jun)</option>
-                                    <option value="3">Q3 (Jul-Sep)</option>
-                                    <option value="4">Q4 (Oct-Dic)</option>
-                                </select>
-                                <select id="report-quarter-year" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                                </select>
-                            </div>
-                            <button onclick="app.generateQuarterlyReport()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
-                                Generar PDF
-                            </button>
-                        </div>
-                        
-                        <!-- Annual Report -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                                </svg>
-                            </div>
-                            <h3 class="font-semibold text-gray-900 mb-2">Informe Anual</h3>
-                            <p class="text-sm text-gray-600 mb-4">Resumen ejecutivo del año completo</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <select id="report-annual-year" class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1">
-                                </select>
-                            </div>
-                            <button onclick="app.generateAnnualReport()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
-                                Generar PDF
-                            </button>
-                        </div>
-                        
-                        <!-- Invoice PDF -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-                                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                </svg>
-                            </div>
-                            <h3 class="font-semibold text-gray-900 mb-2">Factura Individual</h3>
-                            <p class="text-sm text-gray-600 mb-4">Generar PDF de una factura específica</p>
-                            <button onclick="app.showInvoiceSelector()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
-                                Seleccionar factura
-                            </button>
-                        </div>
-                        
-                        <!-- Tax Report -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                </svg>
-                            </div>
-                            <h3 class="font-semibold text-gray-900 mb-2">Resumen Fiscal</h3>
-                            <p class="text-sm text-gray-600 mb-4">IVA repercutido vs soportado</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <select id="report-tax-year" class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1">
-                                </select>
-                            </div>
-                            <button onclick="app.generateTaxReport()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
-                                Generar PDF
-                            </button>
-                        </div>
-                        
-                        <!-- Accounting Book -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                            <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
-                                <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                                </svg>
-                            </div>
-                            <h3 class="font-semibold text-gray-900 mb-2">Libro Contable</h3>
-                            <p class="text-sm text-gray-600 mb-4">Ingresos y gastos completos</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <select id="report-book-year" class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1">
-                                </select>
-                            </div>
-                            <button onclick="app.generateAccountingBook()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
-                                Generar PDF
-                            </button>
-                        </div>
-                    </div>
-                </section>
-                
-                <!-- SETTINGS SECTION -->
-                <section id="section-settings" class="section hidden">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Configuración</h2>
-                    
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Company Data -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                            <h3 class="font-semibold text-gray-900 mb-4">Datos de tu empresa</h3>
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre / Razón social</label>
-                                    <input type="text" id="company-name" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Mi Empresa S.L.">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">NIF / CIF</label>
-                                    <input type="text" id="company-nif" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="B-12345678">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
-                                    <input type="text" id="company-address" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Calle Mayor 1, 28001 Madrid">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                    <input type="email" id="company-email" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="facturas@miempresa.com">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                                    <input type="tel" id="company-phone" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="+34 912 345 678">
-                                </div>
-                                <button onclick="app.saveCompanyData()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
-                                    Guardar datos
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- AI Configuration -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                            <h3 class="font-semibold text-gray-900 mb-4">Configuración IA</h3>
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor de IA externa</label>
-                                    <select id="ai-provider" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-                                        <option value="">Seleccionar proveedor</option>
-                                        <option value="openai">OpenAI</option>
-                                        <option value="gemini">Google Gemini</option>
-                                        <option value="huggingface">HuggingFace</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
-                                    <input type="password" id="ai-api-key" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="sk-...">
-                                    <p class="text-xs text-gray-500 mt-1">Tu API key se guarda localmente en tu navegador</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">URL Ollama (si usas local)</label>
-                                    <input type="text" id="ollama-url" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="http://localhost:11434">
-                                </div>
-                                <button onclick="app.saveAIConfig()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
-                                    Guardar configuración
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Google Sheets -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                            <h3 class="font-semibold text-gray-900 mb-4">Google Sheets</h3>
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">URL del Google Sheet</label>
-                                    <input type="url" id="sheets-url" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="https://docs.google.com/spreadsheets/d/...">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">API Key de Google</label>
-                                    <input type="password" id="sheets-api-key" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="AIza...">
-                                    <p class="text-xs text-gray-500 mt-1">Obtén tu API key en <a href="https://console.cloud.google.com" target="_blank" class="text-primary-600 hover:underline">Google Cloud Console</a></p>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button onclick="app.connectSheets()" class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors">
-                                        Conectar y Sincronizar
-                                    </button>
-                                    <button onclick="app.openSheetsView()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors" title="Abrir en Google Sheets">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button onclick="app.syncToSheets()" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                                        Sincronizar a Sheets
-                                    </button>
-                                    <button onclick="app.importFromSheets()" class="flex-1 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm">
-                                        Importar desde Sheets
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Email Configuration -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                            <h3 class="font-semibold text-gray-900 mb-4">Configuración Email</h3>
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Método de envío</label>
-                                    <select id="email-method" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-                                        <option value="mailto">Abrir cliente de correo (Mailto)</option>
-                                        <option value="smtp">SMTP directo</option>
-                                        <option value="sendgrid">SendGrid API</option>
-                                    </select>
-                                </div>
-                                <div id="smtp-config" class="space-y-3 hidden">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Servidor SMTP</label>
-                                        <input type="text" id="smtp-host" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="smtp.gmail.com">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Puerto</label>
-                                        <input type="number" id="smtp-port" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="587">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
-                                        <input type="email" id="smtp-user" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="tu@gmail.com">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña de aplicación</label>
-                                        <input type="password" id="smtp-pass" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="xxxx xxxx xxxx xxxx">
-                                    </div>
-                                </div>
-                                <div id="sendgrid-config" class="hidden">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">SendGrid API Key</label>
-                                    <input type="password" id="sendgrid-key" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="SG.xxx">
-                                </div>
-                                <button onclick="app.saveEmailConfig()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
-                                    Guardar configuración
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Data Management -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                            <h3 class="font-semibold text-gray-900 mb-4">Gestión de datos</h3>
-                            <div class="space-y-3">
-                                <button onclick="app.exportJSON()" class="w-full bg-white border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                    Exportar backup (JSON)
-                                </button>
-                                <button onclick="document.getElementById('import-input').click()" class="w-full bg-white border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                                    </svg>
-                                    Importar backup (JSON)
-                                </button>
-                                <input type="file" id="import-input" accept=".json" class="hidden" onchange="app.importJSON(event)">
-                                <button onclick="app.clearAllData()" class="w-full bg-red-50 border border-red-200 text-red-700 py-2 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                    Borrar todos los datos
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+<body>
+    <div id="app" class="app-container">
+        <!-- Content will be dynamically rendered -->
+    </div>
 
-                    <!-- User Management Section -->
-                    <div class="mt-6" id="user-management">
-                        <!-- Will be populated by Auth.renderUserManagement() -->
-                    </div>
-                </section>
-                
-            </div>
-        </main>
-    </div>
-    
     <!-- Toast Container -->
-    <div id="toast-container"></div>
-    
-    <!-- Modal Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Modal Overlay -->
     <div id="modal-overlay" class="modal-overlay" onclick="if(event.target===this) app.closeModal()">
-        <div id="modal-content" class="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-        </div>
+        <div id="modal-content" class="modal"></div>
     </div>
-    
+
     <!-- Scripts -->
+    <script src="src/js/i18n/i18n.js"></script>
     <script src="src/js/utils/helpers.js"></script>
     <script src="src/js/storage/indexeddb.js"></script>
     <script src="src/js/storage/sheets.js"></script>

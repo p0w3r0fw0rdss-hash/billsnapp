@@ -384,71 +384,30 @@ const app = {
      * Render Dashboard
      */
     async renderDashboard(container) {
-        const stats = await DB.getStats();
+        const isEs = i18n.getLang() === 'es';
+        
+        // Get accounting summary
+        const accountingSummary = await Accounting.renderDashboardSummary(i18n.getLang());
+        
+        // Get recent invoices
+        const invoices = await DB.getAllInvoices();
+        const recentInvoices = invoices.slice(0, 5);
         
         container.innerHTML = `
             <div class="animate-in">
                 <div class="page-header">
                     <h1 class="page-title">${i18n.t('dashboard.title')}</h1>
-                    <p class="page-subtitle">${i18n.t('app.tagline')}</p>
+                    <p class="page-subtitle">${isEs ? 'Tu contabilidad automática' : 'Your automatic accounting'}</p>
                 </div>
 
-                <!-- Stats -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <span class="stat-label">${i18n.t('dashboard.total_invoices')}</span>
-                            <div class="stat-icon" style="background: var(--accent-blue-light);">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2">
-                                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="stat-value">${stats.totalInvoices}</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <span class="stat-label">${i18n.t('dashboard.total_amount')}</span>
-                            <div class="stat-icon" style="background: var(--accent-green-light);">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2">
-                                    <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="stat-value">${i18n.formatCurrency(stats.totalAmount)}</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <span class="stat-label">${i18n.t('dashboard.total_iva')}</span>
-                            <div class="stat-icon" style="background: var(--accent-purple-light);">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="2">
-                                    <path d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="stat-value">${i18n.formatCurrency(stats.totalIVA)}</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <span class="stat-label">${i18n.t('dashboard.pending')}</span>
-                            <div class="stat-icon" style="background: var(--accent-orange-light);">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-orange)" stroke-width="2">
-                                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="stat-value">${stats.pendingCount}</div>
-                    </div>
-                </div>
+                <!-- Accounting Summary -->
+                ${accountingSummary}
 
                 <!-- Charts -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
                     <div class="card">
                         <div class="card-header">
-                            <span class="card-title">${i18n.t('dashboard.monthly')}</span>
+                            <span class="card-title">${isEs ? 'Ingresos vs Gastos por mes' : 'Income vs Expenses by month'}</span>
                         </div>
                         <div class="card-body">
                             <canvas id="chart-monthly" height="200"></canvas>
@@ -456,7 +415,7 @@ const app = {
                     </div>
                     <div class="card">
                         <div class="card-header">
-                            <span class="card-title">${i18n.t('dashboard.categories')}</span>
+                            <span class="card-title">${isEs ? 'Gastos por categoría' : 'Expenses by category'}</span>
                         </div>
                         <div class="card-body">
                             <canvas id="chart-categories" height="200"></canvas>
@@ -467,29 +426,37 @@ const app = {
                 <!-- Recent Invoices -->
                 <div class="card">
                     <div class="card-header">
-                        <span class="card-title">${i18n.t('dashboard.recent')}</span>
+                        <span class="card-title">${isEs ? 'Últimas facturas' : 'Recent invoices'}</span>
                     </div>
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
                                     <th>${i18n.t('invoices.date')}</th>
-                                    <th>${i18n.t('invoices.number')}</th>
+                                    <th>${isEs ? 'Tipo' : 'Type'}</th>
                                     <th>${i18n.t('invoices.issuer')}</th>
+                                    <th>${isEs ? 'Categoría' : 'Category'}</th>
                                     <th class="right">${i18n.t('invoices.total')}</th>
-                                    <th>${i18n.t('invoices.status')}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${stats.invoices.slice(0, 5).map(inv => `
-                                    <tr onclick="app.viewInvoice('${inv.id}')" style="cursor: pointer;">
-                                        <td>${i18n.formatDate(inv.date)}</td>
-                                        <td><strong>${inv.invoiceNumber || '-'}</strong></td>
-                                        <td>${inv.issuer?.name || '-'}</td>
-                                        <td class="right"><strong>${i18n.formatCurrency(inv.total)}</strong></td>
-                                        <td>${this.renderStatusBadge(inv.status)}</td>
-                                    </tr>
-                                `).join('') || `
+                                ${recentInvoices.map(inv => {
+                                    const type = inv.type || 'expense';
+                                    const categoryInfo = Accounting.getCategoryInfo(inv.category, type);
+                                    return `
+                                        <tr onclick="app.viewInvoice('${inv.id}')" style="cursor: pointer;">
+                                            <td>${i18n.formatDate(inv.date)}</td>
+                                            <td>
+                                                <span class="badge ${type === 'income' ? 'badge-green' : 'badge-red'}">
+                                                    ${type === 'income' ? (isEs ? 'Ingreso' : 'Income') : (isEs ? 'Gasto' : 'Expense')}
+                                                </span>
+                                            </td>
+                                            <td>${inv.issuer?.name || '-'}</td>
+                                            <td>${categoryInfo.icon} ${isEs ? categoryInfo.name : categoryInfo.nameEn}</td>
+                                            <td class="right"><strong>${i18n.formatCurrency(inv.total)}</strong></td>
+                                        </tr>
+                                    `;
+                                }).join('') || `
                                     <tr>
                                         <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-tertiary);">
                                             ${i18n.t('invoices.empty')}
@@ -526,39 +493,65 @@ const app = {
      */
     async loadCharts() {
         const currentYear = new Date().getFullYear().toString();
-        const monthly = await DB.getMonthlyStats(currentYear);
-        const categories = await DB.getCategoryStats(currentYear);
+        const monthlyData = await Accounting.getSummaryByMonth(currentYear);
+        const categoriesData = await Accounting.getSummaryByCategory('expense');
 
         const isDark = this.darkMode;
         const textColor = isDark ? '#a1a1a6' : '#6e6e73';
         const gridColor = isDark ? '#2c2c2e' : '#e5e5ea';
 
-        // Monthly chart
+        // Monthly chart (Income vs Expenses)
         const monthlyCtx = document.getElementById('chart-monthly');
         if (monthlyCtx) {
             if (this.charts.monthly) this.charts.monthly.destroy();
 
             const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const isEs = i18n.getLang() === 'es';
+            if (isEs) {
+                monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            }
 
             this.charts.monthly = new Chart(monthlyCtx, {
                 type: 'bar',
                 data: {
                     labels: monthNames,
-                    datasets: [{
-                        data: monthNames.map((_, i) => monthly[(i + 1).toString().padStart(2, '0')]?.total || 0),
-                        backgroundColor: 'rgba(0, 113, 227, 0.3)',
-                        borderColor: 'rgb(0, 113, 227)',
-                        borderWidth: 1,
-                        borderRadius: 6
-                    }]
+                    datasets: [
+                        {
+                            label: isEs ? 'Ingresos' : 'Income',
+                            data: monthNames.map((_, i) => {
+                                const month = (i + 1).toString().padStart(2, '0');
+                                return monthlyData[month]?.income?.total || 0;
+                            }),
+                            backgroundColor: 'rgba(52, 199, 89, 0.5)',
+                            borderColor: 'rgb(52, 199, 89)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        },
+                        {
+                            label: isEs ? 'Gastos' : 'Expenses',
+                            data: monthNames.map((_, i) => {
+                                const month = (i + 1).toString().padStart(2, '0');
+                                return monthlyData[month]?.expenses?.total || 0;
+                            }),
+                            backgroundColor: 'rgba(255, 59, 48, 0.5)',
+                            borderColor: 'rgb(255, 59, 48)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
-                    plugins: { legend: { display: false } },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: textColor }
+                        }
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { color: textColor, callback: v => i18n.formatCurrency(v) },
+                            ticks: { color: textColor, callback: v => Helpers.formatCurrency(v) },
                             grid: { color: gridColor }
                         },
                         x: {
@@ -570,22 +563,25 @@ const app = {
             });
         }
 
-        // Categories chart
+        // Categories chart (Expenses by category)
         const categoriesCtx = document.getElementById('chart-categories');
         if (categoriesCtx) {
             if (this.charts.categories) this.charts.categories.destroy();
 
-            const labels = Object.keys(categories).map(l => l.substring(0, 15));
-            const values = Object.values(categories);
-            const colors = ['#0071e3', '#34c759', '#ff9500', '#ff3b30', '#af52de', '#5856d6', '#00c7be', '#ff2d55', '#ff6482', '#30b0c7'];
+            const categoryNames = Object.keys(categoriesData).map(key => {
+                const info = Accounting.getCategoryInfo(key, 'expense');
+                return info.icon + ' ' + (i18n.getLang() === 'es' ? info.name : info.nameEn);
+            });
+            const categoryValues = Object.values(categoriesData).map(v => v.total);
+            const colors = ['#0071e3', '#34c759', '#ff9500', '#ff3b30', '#af52de', '#5856d6', '#00c7be', '#ff2d55', '#ff6482', '#30b0c7', '#5ac8fa', '#ffcc00'];
 
             this.charts.categories = new Chart(categoriesCtx, {
                 type: 'doughnut',
                 data: {
-                    labels,
+                    labels: categoryNames,
                     datasets: [{
-                        data: values,
-                        backgroundColor: colors.slice(0, labels.length),
+                        data: categoryValues,
+                        backgroundColor: colors.slice(0, categoryNames.length),
                         borderWidth: 0
                     }]
                 },
@@ -1083,17 +1079,21 @@ const app = {
                 if (!inv.invoiceNumber) inv.invoiceNumber = Helpers.generateInvoiceNumber(existingCount + i);
                 if (!inv.date) inv.date = new Date().toISOString().split('T')[0];
                 inv.status = 'issued';
-                await DB.addInvoice(inv);
+
+                // Classify as income or expense and categorize
+                const classified = await Accounting.processInvoice(inv);
+                
+                await DB.addInvoice(classified);
             }
 
-            this.showToast(`${this.extractedInvoices.length} invoices saved`, 'success');
+            this.showToast(`${this.extractedInvoices.length} invoices saved and classified`, 'success');
 
             this.uploadQueue = [];
             this.extractedInvoices = [];
             document.getElementById('upload-queue').style.display = 'none';
             document.getElementById('extracted-preview').style.display = 'none';
 
-            this.showSection('invoices');
+            this.showSection('dashboard');
         } catch (error) {
             this.showToast('Error saving invoices', 'error');
         }
@@ -1112,17 +1112,22 @@ const app = {
      * Render Invoices section
      */
     async renderInvoices(container) {
+        const isEs = i18n.getLang() === 'es';
         const invoices = await DB.getAllInvoices(this.sortField, this.sortAscending);
-        const totalBase = invoices.reduce((sum, inv) => sum + (inv.baseAmount || 0), 0);
-        const totalIVA = invoices.reduce((sum, inv) => sum + (inv.ivaAmount || 0), 0);
-        const totalAmount = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+        
+        // Separate by type
+        const incomeInvoices = invoices.filter(inv => inv.type === 'income');
+        const expenseInvoices = invoices.filter(inv => inv.type === 'expense' || !inv.type);
+        
+        const totalIncome = incomeInvoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+        const totalExpenses = expenseInvoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
 
         container.innerHTML = `
             <div class="animate-in">
                 <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div>
-                        <h1 class="page-title">${i18n.t('invoices.title')}</h1>
-                        <p class="page-subtitle">${invoices.length} ${i18n.getLang() === 'es' ? 'facturas en total' : 'total invoices'}</p>
+                        <h1 class="page-title">${isEs ? 'Facturas' : 'Invoices'}</h1>
+                        <p class="page-subtitle">${invoices.length} ${isEs ? 'facturas en total' : 'total invoices'}</p>
                     </div>
                     <div style="display: flex; gap: 8px;">
                         <button class="btn btn-secondary" onclick="app.exportCSV()">
@@ -1140,79 +1145,125 @@ const app = {
                     </div>
                 </div>
 
+                <!-- Summary cards -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                    <div class="card" style="border-left: 4px solid var(--accent-green);">
+                        <div class="card-body" style="padding: 16px;">
+                            <div style="font-size: 14px; color: var(--text-secondary);">${isEs ? 'Total Ingresos' : 'Total Income'}</div>
+                            <div style="font-size: 24px; font-weight: 700; color: var(--accent-green);">${Helpers.formatCurrency(totalIncome)}</div>
+                            <div style="font-size: 12px; color: var(--text-tertiary);">${incomeInvoices.length} ${isEs ? 'facturas' : 'invoices'}</div>
+                        </div>
+                    </div>
+                    <div class="card" style="border-left: 4px solid var(--accent-red);">
+                        <div class="card-body" style="padding: 16px;">
+                            <div style="font-size: 14px; color: var(--text-secondary);">${isEs ? 'Total Gastos' : 'Total Expenses'}</div>
+                            <div style="font-size: 24px; font-weight: 700; color: var(--accent-red);">${Helpers.formatCurrency(totalExpenses)}</div>
+                            <div style="font-size: 12px; color: var(--text-tertiary);">${expenseInvoices.length} ${isEs ? 'facturas' : 'invoices'}</div>
+                        </div>
+                    </div>
+                    <div class="card" style="border-left: 4px solid ${totalIncome - totalExpenses >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'};">
+                        <div class="card-body" style="padding: 16px;">
+                            <div style="font-size: 14px; color: var(--text-secondary);">${isEs ? 'Beneficio' : 'Profit'}</div>
+                            <div style="font-size: 24px; font-weight: 700; color: ${totalIncome - totalExpenses >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'};">${Helpers.formatCurrency(totalIncome - totalExpenses)}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter tabs -->
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                    <button class="btn ${this.invoiceFilter === 'all' ? 'btn-primary' : 'btn-secondary'}" onclick="app.filterInvoicesByType('all')">
+                        ${isEs ? 'Todas' : 'All'} (${invoices.length})
+                    </button>
+                    <button class="btn ${this.invoiceFilter === 'income' ? 'btn-primary' : 'btn-secondary'}" onclick="app.filterInvoicesByType('income')" style="${this.invoiceFilter === 'income' ? 'background: var(--accent-green);' : ''}">
+                        ${isEs ? 'Ingresos' : 'Income'} (${incomeInvoices.length})
+                    </button>
+                    <button class="btn ${this.invoiceFilter === 'expense' ? 'btn-primary' : 'btn-secondary'}" onclick="app.filterInvoicesByType('expense')" style="${this.invoiceFilter === 'expense' ? 'background: var(--accent-red);' : ''}">
+                        ${isEs ? 'Gastos' : 'Expenses'} (${expenseInvoices.length})
+                    </button>
+                </div>
+
                 <div class="card">
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>${i18n.t('invoices.date')}</th>
-                                    <th>${i18n.t('invoices.number')}</th>
-                                    <th>${i18n.t('invoices.issuer')}</th>
-                                    <th>${i18n.t('invoices.concept')}</th>
-                                    <th class="right">${i18n.t('invoices.base')}</th>
-                                    <th class="right">${i18n.t('invoices.iva_percent')}</th>
-                                    <th class="right">${i18n.t('invoices.iva_amount')}</th>
-                                    <th class="right">${i18n.t('invoices.total')}</th>
-                                    <th>${i18n.t('invoices.status')}</th>
-                                    <th>${i18n.t('invoices.actions')}</th>
+                                    <th>${isEs ? 'Fecha' : 'Date'}</th>
+                                    <th>${isEs ? 'Tipo' : 'Type'}</th>
+                                    <th>${isEs ? 'Emisor' : 'Issuer'}</th>
+                                    <th>${isEs ? 'Categoría' : 'Category'}</th>
+                                    <th>${isEs ? 'Concepto' : 'Description'}</th>
+                                    <th class="right">${isEs ? 'Base' : 'Base'}</th>
+                                    <th class="right">IVA</th>
+                                    <th class="right">${isEs ? 'Total' : 'Total'}</th>
+                                    <th>${isEs ? 'Acciones' : 'Actions'}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${invoices.map(inv => `
+                                ${this.getFilteredInvoices(invoices).map(inv => {
+                                    const type = inv.type || 'expense';
+                                    const categoryInfo = Accounting.getCategoryInfo(inv.category, type);
+                                    return `
+                                        <tr>
+                                            <td>${i18n.formatDate(inv.date)}</td>
+                                            <td>
+                                                <span class="badge ${type === 'income' ? 'badge-green' : 'badge-red'}">
+                                                    ${type === 'income' ? (isEs ? 'Ingreso' : 'Income') : (isEs ? 'Gasto' : 'Expense')}
+                                                </span>
+                                            </td>
+                                            <td>${(inv.issuer?.name || '-').substring(0, 20)}</td>
+                                            <td>${categoryInfo.icon} ${isEs ? categoryInfo.name : categoryInfo.nameEn}</td>
+                                            <td>${(inv.description || '-').substring(0, 25)}</td>
+                                            <td class="right">${Helpers.formatCurrency(inv.baseAmount)}</td>
+                                            <td class="right">${Helpers.formatCurrency(inv.ivaAmount)}</td>
+                                            <td class="right"><strong>${Helpers.formatCurrency(inv.total)}</strong></td>
+                                            <td>
+                                                <div style="display: flex; gap: 4px;">
+                                                    <button class="btn btn-ghost btn-icon btn-sm" onclick="app.viewInvoice('${inv.id}')" title="${isEs ? 'Ver' : 'View'}">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                                    </button>
+                                                    <button class="btn btn-ghost btn-icon btn-sm" onclick="app.editInvoice('${inv.id}')" title="${isEs ? 'Editar' : 'Edit'}">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                                    </button>
+                                                    <button class="btn btn-ghost btn-icon btn-sm" onclick="app.deleteInvoice('${inv.id}')" title="${isEs ? 'Eliminar' : 'Delete'}">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('') || `
                                     <tr>
-                                        <td>${i18n.formatDate(inv.date)}</td>
-                                        <td><strong>${inv.invoiceNumber || '-'}</strong></td>
-                                        <td>${(inv.issuer?.name || '-').substring(0, 20)}</td>
-                                        <td>${(inv.description || '-').substring(0, 25)}</td>
-                                        <td class="right">${i18n.formatCurrency(inv.baseAmount)}</td>
-                                        <td class="right">${inv.ivaPercent || 21}%</td>
-                                        <td class="right">${i18n.formatCurrency(inv.ivaAmount)}</td>
-                                        <td class="right"><strong>${i18n.formatCurrency(inv.total)}</strong></td>
-                                        <td>${this.renderStatusBadge(inv.status)}</td>
-                                        <td>
-                                            <div style="display: flex; gap: 4px;">
-                                                <button class="btn btn-ghost btn-icon btn-sm" onclick="app.viewInvoice('${inv.id}')" title="${i18n.t('action.view')}">
-                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                                </button>
-                                                <button class="btn btn-ghost btn-icon btn-sm" onclick="app.editInvoice('${inv.id}')" title="${i18n.t('action.edit')}">
-                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                                </button>
-                                                <button class="btn btn-ghost btn-icon btn-sm" onclick="app.downloadInvoicePDF('${inv.id}')" title="${i18n.t('action.download')}">
-                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                                </button>
-                                                <button class="btn btn-ghost btn-icon btn-sm" onclick="app.deleteInvoice('${inv.id}')" title="${i18n.t('action.delete')}">
-                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                `).join('') || `
-                                    <tr>
-                                        <td colspan="10" style="text-align: center; padding: 60px; color: var(--text-tertiary);">
-                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 16px; opacity: 0.3;">
-                                                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                            </svg>
-                                            <p style="font-weight: 600; margin-bottom: 4px;">${i18n.t('invoices.empty')}</p>
-                                            <p>${i18n.t('invoices.empty_desc')}</p>
+                                        <td colspan="9" style="text-align: center; padding: 60px; color: var(--text-tertiary);">
+                                            ${isEs ? 'No hay facturas. ¡Sube tu primera factura!' : 'No invoices. Upload your first invoice!'}
                                         </td>
                                     </tr>
                                 `}
                             </tbody>
                         </table>
                     </div>
-                    ${invoices.length > 0 ? `
-                        <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 14px; color: var(--text-secondary);">${invoices.length} ${i18n.getLang() === 'es' ? 'facturas' : 'invoices'}</span>
-                            <div style="display: flex; gap: 24px;">
-                                <span style="font-size: 14px; color: var(--text-secondary);">${i18n.t('invoices.base')}: <strong>${i18n.formatCurrency(totalBase)}</strong></span>
-                                <span style="font-size: 14px; color: var(--text-secondary);">${i18n.t('invoices.iva_amount')}: <strong>${i18n.formatCurrency(totalIVA)}</strong></span>
-                                <span style="font-size: 14px;">${i18n.t('invoices.total')}: <strong style="font-size: 16px;">${i18n.formatCurrency(totalAmount)}</strong></span>
-                            </div>
-                        </div>
-                    ` : ''}
                 </div>
             </div>
         `;
+    },
+
+    // Invoice filter state
+    invoiceFilter: 'all',
+
+    /**
+     * Filter invoices by type
+     */
+    filterInvoicesByType(type) {
+        this.invoiceFilter = type;
+        this.renderInvoices(document.getElementById('content-area'));
+    },
+
+    /**
+     * Get filtered invoices
+     */
+    getFilteredInvoices(invoices) {
+        if (this.invoiceFilter === 'all') return invoices;
+        if (this.invoiceFilter === 'income') return invoices.filter(inv => inv.type === 'income');
+        return invoices.filter(inv => inv.type === 'expense' || !inv.type);
     },
 
     /**

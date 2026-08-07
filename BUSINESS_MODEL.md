@@ -1,337 +1,160 @@
-# BillSnap - Documento Maestro de Negocio y Arquitectura
+# BillSnap - Documento Maestro de Negocio
 
-> **Última actualización**: Estructura completa de negocio, precios, y arquitectura técnica
-
----
-
-## 🎯 Visión
-
-**BillSnap** es una app de facturación con IA que extrae datos de facturas automáticamente (fotos, PDFs, documentos). Sin entrenar, sin complicaciones.
-
-**Mercado objetivo**: Autónomos, PYMES, asesores fiscales, emprendedores (España + internacional)
-
-**Diferenciador**: IA que RAZONA sobre documentos (no OCR que hay que entrenar)
+> **Última actualización**: Visión final enfocada en organización y contabilidad de facturas
 
 ---
 
-## 📊 Análisis de Mercado
+## 🎯 Visión Clara
 
-### Competencia directa (España)
+**BillSnap** es un SaaS que **organiza y contabiliza facturas recibidas** usando IA.
 
-| App | Precio | Qué hace | Debilidad |
-|-----|--------|----------|-----------|
-| **renn** | Gratis (25 facturas/mes), 15€/mes | Facturación + Verifactu | Sin OCR/IA |
-| **Cuentica** | 9.90€/mes | Facturación + modelos fiscales | Sin OCR/IA |
-| **Quipu** | 12-60€/mes | Facturación + contabilidad | Sin OCR/IA |
-| **Holded** | 7.50-100€/mes | ERP completo | Complejo, sin OCR |
-| **Xolo** | 75-149€/mes | Facturación + gestoría | Caro |
+No emitimos facturas (de momento). Recibimos, organizamos y contabilizamos.
 
-### Competencia internacional
-
-| App | Precio | Qué hace | Debilidad |
-|-----|--------|----------|-----------|
-| **FreshBooks** | $23-70/mes | Facturación | Sin OCR/IA |
-| **Wave** | Gratis / $16/mes | Facturación básica | Sin IA |
-| **Zoho Invoice** | Gratis / $15/mes | Facturación | Sin OCR |
-| **Invoice Ninja** | Gratis / $14/mes | Facturación | Sin IA |
-| **ScanToExcel** | Gratis (10/día), $29/mes | Solo OCR → Excel | Sin facturación |
-
-### 💡 Conclusión
-> **Ninguna combina OCR/IA + facturación + contabilidad + PDFs en una sola app a precio accesible.** Hay un hueco claro en el mercado.
-
----
-
-## 💰 Estrategia de Precios
-
-### MODELO DUAL: Local (compra) + Cloud (suscripción)
-
----
-
-### 🖥️ VERSIÓN LOCAL (App Desktop)
-
-**Precio**: Compra única + actualizaciones opcionales
-
-| Plan | Precio | Qué incluye | Licencia |
-|------|--------|-------------|----------|
-| **BillSnap Starter** | **99€** | App básica, Tesseract OCR, 1 empresa | 1 PC, perpetua v1.x |
-| **BillSnap Pro** | **179€** | + IA (Ollama/WebLLM), múltiples empresas, todos los PDFs | 1 PC, perpetua v1.x |
-| **BillSnap Business** | **249€** | + Multi-usuario (3), Google Sheets, email | 3 PCs, perpetua v1.x |
-
-**Actualizaciones opcionales**:
-- Actualización mayor (v2.0): 40% del precio original = 40-100€
-- Soporte prioritario: 29€/año
-
-**Anti-piracy**:
-- Licencia vinculada a hardware (fingerprint del PC)
-- Activación online una vez (después funciona offline)
-- Máximo 2 reactivaciones (cambio de PC)
-- Si quiere más PCs: compra licencia adicional
-
-**¿Por qué no abusarán?**
-- 99€ es barato para una empresa, no merece la pena piratear
-- Las actualizaciones mayores generan ingresos recurrentes
-- El valor está en la IA, que mejora constantemente
-
----
-
-### ☁️ VERSIÓN CLOUD (Suscripción)
-
-**Precio**: Mensual/anual con descuento
-
-| Plan | Mensual | Anual (ahorro) | Facturas/mes | Usuarios | IA |
-|------|---------|----------------|-------------|----------|-----|
-| **Free** | 0€ | 0€ | 25 | 1 | Tesseract |
-| **Starter** | 9€ | 79€/año (27% dto) | 200 | 1 | + WebLLM |
-| **Pro** | 19€ | 179€/año (21% dto) | 1,000 | 3 | + Vision AI |
-| **Business** | 39€ | 379€/año (19% dto) | 5,000 | 10 | + API externa |
-| **Enterprise** | 79€ | 749€/año (21% dto) | Ilimitado | Ilimitado | Todo + personalizado |
-
-**Anti-abuso de suscripción** (el que se suscribe 3 meses y se va):
-- Plan anual con descuento significativo (incentivar compromiso)
-- Facturación trimestral: 29€/trimestre (Starter), 59€ (Pro)
-- Los datos se exportan pero la IA no funciona sin suscripción
-- Funciones premium (IA, PDFs avanzados) solo con suscripción activa
-
----
-
-### 🎯 Precios para Asesorías Fiscales (White Label)
-
-| Plan | Precio | Qué incluye |
-|------|--------|-------------|
-| **BillSnap para Asesorías** | 149€/mes | Marca blanca, clientes ilimitados, API |
-
----
-
-## 🏗️ Arquitectura Técnica
-
-### Diagrama General
+### Flujo del usuario
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                          BillSnap                                │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌─────────────────┐          ┌─────────────────┐               │
-│  │  VERSIÓN LOCAL  │          │  VERSIÓN CLOUD  │               │
-│  │  (Tauri App)    │          │  (Web/PWA)      │               │
-│  └────────┬────────┘          └────────┬────────┘               │
-│           │                            │                         │
-│           ▼                            ▼                         │
-│  ┌────────────────────────────────────────────────────────┐     │
-│  │                    MOTOR DE IA                          │     │
-│  │                                                         │     │
-│  │  Prioridad 1: Ollama (local, mejor calidad)            │     │
-│  │       ↓ fallback                                        │     │
-│  │  Prioridad 2: WebLLM (navegador, sin instalar)         │     │
-│  │       ↓ fallback                                        │     │
-│  │  Prioridad 3: Transformers.js (navegador, visión)      │     │
-│  │       ↓ fallback                                        │     │
-│  │  Prioridad 4: API externa (OpenAI/Gemini/HF)          │     │
-│  │       ↓ fallback                                        │     │
-│  │  Prioridad 5: Tesseract.js (OCR básico)               │     │
-│  │                                                         │     │
-│  └────────────────────────────────────────────────────────┘     │
-│                                                                  │
-│  ┌────────────────────────────────────────────────────────┐     │
-│  │                    ALMACENAMIENTO                       │     │
-│  │                                                         │     │
-│  │  Local: IndexedDB (navegador) / SQLite (Tauri)         │     │
-│  │  Cloud: Supabase (PostgreSQL) + Storage                 │     │
-│  │  Sync: Google Sheets (opcional)                         │     │
-│  │                                                         │     │
-│  └────────────────────────────────────────────────────────┘     │
-│                                                                  │
-│  ┌────────────────────────────────────────────────────────┐     │
-│  │                    FUNCIONALIDADES                      │     │
-│  │                                                         │     │
-│  │  ✅ Subir fotos/PDFs/docs/Excel                        │     │
-│  │  ✅ OCR automático con IA                               │     │
-│  │  ✅ Tabla organizada por fecha                          │     │
-│  │  ✅ Emitir facturas con logo propio                     │     │
-│  │  ✅ PDFs (facturas, informes, contabilidad)            │     │
-│  │  ✅ Exportar CSV/Excel/JSON                             │     │
-│  │  ✅ Multi-idioma (ES/EN)                                │     │
-│  │  ✅ Multi-moneda (EUR/USD/GBP)                          │     │
-│  │  ✅ Gestión de clientes                                 │     │
-│  │  ✅ Dashboard con gráficos                              │     │
-│  │                                                         │     │
-│  └────────────────────────────────────────────────────────┘     │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-### Selector de IA por Hardware del Usuario
-
-```
-USUARIO ABRE BILLSNAP
+USUARIO RECIBE FACTURA (de proveedor o de cliente)
          │
          ▼
-┌─────────────────────────────────────┐
-│  Detectar recursos del PC           │
-│  - RAM total                        │
-│  - GPU disponible                   │
-│  - VRAM                             │
-│  - Navegador (WebGPU?)              │
-└────────────────┬────────────────────┘
-                 │
-    ┌────────────┼────────────┬──────────────┬─────────────┐
-    ▼            ▼            ▼              ▼             ▼
- GPU potente  GPU+RAM     RAM 16GB+      RAM 4-8GB     RAM <4GB
- (8GB+ VRAM)  (4-8GB)     sin GPU        sin GPU       sin GPU
-    │            │            │              │             │
-    ▼            ▼            ▼              ▼             ▼
- Ollama       Ollama      WebLLM        API Key      Tesseract
- qwen2.5vl    moondream   Phi-3.5       OpenAI/Gemini
- :7b          /minicpm    /Llama 3.2
-              -V          3B
-    │            │            │              │             │
-    ▼            ▼            ▼              ▼             ▼
- ⭐⭐⭐⭐⭐   ⭐⭐⭐⭐    ⭐⭐⭐⭐      ⭐⭐⭐⭐⭐    ⭐⭐⭐
- Vision AI    Vision AI   Razona         Vision AI     OCR
- ve fotos     ve fotos    sobre OCR      ve fotos      básico
+SUBE A BILLSNAP (foto, PDF, documento)
+         │
+         ▼
+IA EXTRAE DATOS automáticamente
+(fecha, emisor, concepto, base, IVA, total)
+         │
+         ▼
+SISTEMA CLASIFICA
+├─ ¿Emisor somos nosotros? → INGRESO (cliente nos paga)
+└─ ¿Emisor es otro? → GASTO (nosotros pagamos)
+         │
+         ▼
+CONTABILIDAD AUTOMÁTICA
+├─ Total ingresos
+├─ Total gastos
+├─ IVA soportado (gastos)
+├─ IVA repercutido (ingresos)
+├─ Beneficio/pérdida
+└─ A pagar a Hacienda
+         │
+         ▼
+INFORMES PARA GESTOR/HACIENDA
+├─ PDF trimestral
+├─ Exportar CSV/JSON
+└─ Resumen fiscal
 ```
 
 ---
 
-### Versiones de la App
+## 👤 Público Objetivo
 
-| Característica | Local (Tauri) | Cloud (Web) |
-|---------------|---------------|-------------|
-| **Distribución** | Descarga directa | GitHub + Vercel |
-| **Motor IA** | Ollama + fallbacks | WebLLM + API + Tesseract |
-| **Almacenamiento** | SQLite local | Supabase (PostgreSQL) |
-| **Multi-usuario** | Sí (red local) | Sí (cloud) |
-| **Offline** | ✅ 100% | ⚠️ Parcial (PWA) |
-| **Actualizaciones** | Manual o auto-update | Automático |
-| **Precio** | Compra única 99-249€ | Suscripción 0-79€/mes |
+| Perfil | Necesidad | Dónde encontrarlos |
+|--------|-----------|-------------------|
+| **Autónomos** | Organizar facturas trimestrales | Foros, redes, Google |
+| **PYMES** | Control de gastos e ingresos | LinkedIn, eventos |
+| **Gestorías** | Recibir facturas organizadas de clientes | Partnership directo |
+| **Freelancers** | Saber cuánto ganan y gastan | Comunidades online |
 
 ---
 
-## 📋 Funcionalidades por Plan
+## 💰 Precios
 
-### VERSIÓN LOCAL
+| Plan | Precio | Facturas/mes | Usuarios | IA | Para quién |
+|------|--------|-------------|----------|-----|-----------|
+| **Free** | 0€ | 25 | 1 | Tesseract | Probar la app |
+| **Autónomo** | 9€/mes | 200 | 1 | WebLLM | Autónomo solo |
+| **PYME** | 19€/mes | 1,000 | 3 | Vision AI | Empresa pequeña |
+| **Gestoría** | 49€/mes | 5,000 | 10 | Vision AI | Gestor con clientes |
+| **Business** | 99€/mes | Ilimitado | Ilimitado | Todo | Empresa grande |
 
-| Función | Starter (99€) | Pro (179€) | Business (249€) |
-|---------|--------------|------------|-----------------|
-| Subir fotos/PDFs/docs | ✅ | ✅ | ✅ |
-| OCR Tesseract | ✅ | ✅ | ✅ |
-| IA Ollama/WebLLM | ❌ | ✅ | ✅ |
-| Facturas con logo | ✅ | ✅ | ✅ |
-| PDF individual | ✅ | ✅ | ✅ |
-| Informes PDF | ❌ | ✅ | ✅ |
-| Contabilidad | ❌ | ✅ | ✅ |
-| Multi-empresa | 1 | 3 | 10 |
-| Multi-usuario | 1 | 1 | 3 |
-| Google Sheets | ❌ | ❌ | ✅ |
-| Email facturas | ❌ | ❌ | ✅ |
-| Exportar CSV/JSON | ✅ | ✅ | ✅ |
-| Multi-idioma | ✅ | ✅ | ✅ |
-| Multi-moneda | ❌ | ✅ | ✅ |
-| Gestión clientes | ❌ | ✅ | ✅ |
-| Dashboard | Básico | Completo | Completo |
-| Actualizaciones | v1.x | v1.x | v1.x |
+**Descuento anual**: 2 meses gratis (pagues 10 por 12)
 
-### VERSIÓN CLOUD
+---
 
-| Función | Free | Starter (9€) | Pro (19€) | Business (39€) | Enterprise (79€) |
-|---------|------|-------------|-----------|----------------|------------------|
+## 🏆 Diferenciadores
+
+| Competidor | ¿Emite facturas? | ¿Organiza recibidas? | ¿IA lee fotos? | ¿Contabilidad? |
+|-----------|------------------|---------------------|----------------|----------------|
+| renn | ✅ Sí | ❌ No | ❌ No | ⚠️ Básica |
+| Cuentica | ✅ Sí | ❌ No | ❌ No | ✅ Sí |
+| Quipu | ✅ Sí | ⚠️ Básico | ❌ No | ✅ Sí |
+| Holded | ✅ Sí | ⚠️ Básico | ❌ No | ✅ Sí |
+| **BillSnap** | ❌ No | ✅ **SÍ** | ✅ **SÍ** | ✅ **SÍ** |
+
+**Nuestro único**: "Sube una foto, la IA organiza y contabiliza"
+
+---
+
+## 🧠 Arquitectura IA
+
+### Cascada por hardware del usuario
+
+```
+GPU potente → Ollama (Vision AI, la mejor calidad)
+GPU medio → Ollama (modelos ligeros)
+RAM 16GB+ → WebLLM (Phi-3.5, Llama 3.2)
+RAM 4-8GB → API key (OpenAI/Gemini)
+RAM <4GB → Tesseract (OCR básico)
+```
+
+### Proveedores soportados
+
+| Proveedor | Tipo | Coste para usuario |
+|-----------|------|-------------------|
+| **Ollama** | Local | Gratis |
+| **WebLLM** | Navegador | Gratis |
+| **Transformers.js** | Navegador | Gratis |
+| **OpenAI** | API | ~0.001€/factura |
+| **Google Gemini** | API | Gratis (15 req/min) |
+| **HuggingFace** | API | Gratis (limitado) |
+| **Tesseract** | Local | Gratis |
+
+---
+
+## 📱 Formatos Soportados
+
+| Tipo | Formatos | Método |
+|------|----------|--------|
+| **Fotos** | JPG, PNG, HEIC, WebP | OCR + IA |
+| **PDFs** | PDF (texto y escaneado) | Extracción + OCR |
+| **Documentos** | DOCX | Extracción texto |
+| **Hojas de cálculo** | XLSX, CSV | Lectura directa |
+| **❌ NO** | Facturas manuscritas | Demasiado impreciso |
+
+---
+
+## 📊 Funcionalidades por Plan
+
+| Función | Free | Autónomo | PYME | Gestoría | Business |
+|---------|------|----------|------|----------|----------|
 | Facturas/mes | 25 | 200 | 1,000 | 5,000 | Ilimitado |
 | Usuarios | 1 | 1 | 3 | 10 | Ilimitado |
 | OCR Tesseract | ✅ | ✅ | ✅ | ✅ | ✅ |
-| WebLLM (navegador) | ❌ | ✅ | ✅ | ✅ | ✅ |
+| WebLLM (IA navegador) | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Vision AI (Ollama) | ❌ | ❌ | ✅ | ✅ | ✅ |
 | API externa | ❌ | ❌ | ❌ | ✅ | ✅ |
-| Facturas con logo | ❌ | ✅ | ✅ | ✅ | ✅ |
-| PDFs informes | ❌ | ✅ | ✅ | ✅ | ✅ |
-| Contabilidad | ❌ | ❌ | ✅ | ✅ | ✅ |
-| Google Sheets | ❌ | ❌ | ✅ | ✅ | ✅ |
-| Email | ❌ | ❌ | ❌ | ✅ | ✅ |
-| Multi-moneda | ❌ | ✅ | ✅ | ✅ | ✅ |
-| Gestión clientes | ❌ | ❌ | ✅ | ✅ | ✅ |
-| API REST | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Marca blanca | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Clasificación auto | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Categorías | 5 | Ilimitadas | Ilimitadas | Ilimitadas | Ilimitadas |
+| Dashboard | Básico | Completo | Completo | Completo | Completo |
+| Informes PDF | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Exportar CSV/JSON | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Multi-empresa | 1 | 1 | 3 | 20 | Ilimitado |
+| Multi-idioma | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Soporte | Email | Email | Email | Prioritario | Dedicado |
 
 ---
 
 ## 🛡️ Anti-Piracy y Anti-Abuso
 
-### Para versión LOCAL:
+### Local (futuro, con Tauri)
+- Licencia vinculada a hardware
+- Precio accesible (99-249€)
+- Actualizaciones mayores de pago
 
-| Estrategia | Cómo funciona |
-|-----------|---------------|
-| **Hardware fingerprint** | Licencia vinculada a componentes del PC (CPU, motherboard, disco) |
-| **Activación online** | Una vez al instalar (después offline) |
-| **Límite de reactivaciones** | 2 reactivaciones gratis, luego contactar soporte |
-| **Verificación periódica** | Cada 30 días, si hay internet verifica licencia |
-| **Precio accesible** | 99€ es "demasiado barato para piratear" para empresas |
-
-### Para versión CLOUD:
-
-| Estrategia | Cómo funciona |
-|-----------|---------------|
-| **Freemium** | 25 facturas/mes gratis (enganchar) |
-| **Plan anual con descuento** | Incentivar compromiso a largo plazo |
-| **Funciones premium** | IA avanzada solo con suscripción activa |
-| **Exportar datos** | Siempre puede exportar, pero la IA no funciona sin pagar |
-| **Facturación por uso** | Límites claros por plan |
-
-### Para asesorías que "usan 3 meses":
-
-| Estrategia | Cómo funciona |
-|-----------|---------------|
-| **Plan trimestral** | 29€/trimestre (Starter) - más caro por mes que anual |
-| **Facturación mínima** | Mínimo 3 meses en planes mensuales |
-| **Compromiso anual** | Mejor precio si paga anual |
-| **Valor continuo** | Dashboard, alertas, backups - útil todo el año |
-
----
-
-## 📱 Tipos de Archivo Soportados
-
-| Tipo | Formatos | Método de lectura |
-|------|----------|-------------------|
-| **Fotos** | JPG, PNG, HEIC, WebP, BMP | OCR + IA |
-| **PDFs** | PDF (texto y escaneado) | Extracción texto + OCR si escaneado |
-| **Documentos** | DOCX (Word) | Extracción texto |
-| **Hojas de cálculo** | XLSX, CSV | Lectura directa |
-| **❌ NO soportado** | Facturas manuscritas | (demasiado impreciso) |
-
----
-
-## 🚀 Plan de Lanzamiento
-
-### Fase 1: MVP Cloud (Semana 1-2)
-- [ ] Deploy en Vercel
-- [ ] Funcionalidades core (subir, OCR, tabla, PDF básico)
-- [ ] Plan Free funcionando
-- [ ] Landing page básica
-
-### Fase 2: Monetización Cloud (Semana 3-4)
-- [ ] Integrar Stripe
-- [ ] Planes Starter y Pro
-- [ ] Facturas con logo
-- [ ] Informes PDF
-
-### Fase 3: App Local (Semana 5-6)
-- [ ] Empaquetar con Tauri
-- [ ] Sistema de licencias
-- [ ] Bundle Ollama
-- [ ] Detector de hardware
-
-### Fase 4: Marketing (Semana 7-8)
-- [ ] Landing page profesional
-- [ ] SEO (español + inglés)
-- [ ] ProductHunt launch
-- [ ] Redes sociales
-
-### Fase 5: Expansión (Mes 3+)
-- [ ] Más idiomas (FR, PT, DE)
-- [ ] App móvil (React Native)
-- [ ] API REST para integraciones
-- [ ] Marca blanca para asesorías
+### Cloud (actual)
+- Freemium: 25 facturas gratis
+- Plan anual con 2 meses gratis
+- Límites claros por plan
+- Datos exportables siempre
 
 ---
 
@@ -339,38 +162,69 @@ USUARIO ABRE BILLSNAP
 
 ### Año 1 (Conservador)
 
-| Canal | Usuarios | ARPU | MRR | ARR |
-|-------|----------|------|-----|-----|
-| Cloud Free | 2,000 | 0€ | 0€ | 0€ |
-| Cloud Starter | 200 | 9€ | 1,800€ | 21,600€ |
-| Cloud Pro | 50 | 19€ | 950€ | 11,400€ |
-| Cloud Business | 10 | 39€ | 390€ | 4,680€ |
-| Local Starter | 100 | 99€ | - | 9,900€ |
-| Local Pro | 50 | 179€ | - | 8,950€ |
-| Local Business | 20 | 249€ | - | 4,980€ |
-| **TOTAL** | | | **3,140€/mes** | **61,510€** |
+| Plan | Usuarios | MRR |
+|------|----------|-----|
+| Free | 2,000 | 0€ |
+| Autónomo | 200 | 1,800€ |
+| PYME | 50 | 950€ |
+| Gestoría | 10 | 490€ |
+| Business | 5 | 495€ |
+| **TOTAL** | | **3,735€/mes** |
 
 ### Año 3 (Optimista)
 
-| Canal | Usuarios | ARPU | MRR | ARR |
-|-------|----------|------|-----|-----|
-| Cloud (todos) | 10,000 | 15€ | 150,000€ | 1,800,000€ |
-| Local (todos) | 2,000 | 150€ | - | 300,000€ |
-| White Label | 20 | 149€ | 2,980€ | 35,760€ |
-| **TOTAL** | | | **152,980€/mes** | **2,135,760€** |
+| Plan | Usuarios | MRR |
+|------|----------|-----|
+| Free | 20,000 | 0€ |
+| Autónomo | 2,000 | 18,000€ |
+| PYME | 500 | 9,500€ |
+| Gestoría | 100 | 4,900€ |
+| Business | 50 | 4,950€ |
+| **TOTAL** | | **37,350€/mes = ~448K€/año** |
 
 ---
 
-## 💡 Resumen Ejecutivo
+## 🚀 Plan de Lanzamiento
 
-| Aspecto | Decisión |
-|---------|----------|
-| **Producto** | App facturación con IA que razona sobre documentos |
-| **Mercado** | Autónomos, PYMES, asesores fiscales (ES + EN) |
-| **Diferenciador** | IA sin entrenar, entiende cualquier formato |
-| **Local** | 99-249€ compra única, Tauri app |
-| **Cloud** | 0-79€/mes, GitHub + Vercel |
-| **Anti-piracy** | Hardware fingerprint + precio accesible |
-| **Anti-abuso** | Planes anuales con descuento + límites claros |
-| **Formatos** | Fotos, PDFs, DOCX, XLSX (NO manuscritas) |
-| **IA** | Cascada: Ollama → WebLLM → Transformers.js → API → Tesseract |
+### Fase 1: MVP (Semana 1-4)
+- [ ] Subir fotos/PDFs
+- [ ] OCR con Tesseract
+- [ ] IA extrae datos
+- [ ] Clasificar: GASTO vs INGRESO
+- [ ] Tabla organizada por fecha
+- [ ] Categorías (luz, teléfono, material, etc.)
+- [ ] Dashboard básico (total gastos, ingresos)
+- [ ] Exportar CSV
+- [ ] Deploy en Vercel
+
+### Fase 2: Monetización (Semana 5-8)
+- [ ] Integrar Stripe
+- [ ] Planes Free, Autónomo, PYME
+- [ ] Informes PDF trimestrales
+- [ ] Multi-empresa
+- [ ] Landing page
+
+### Fase 3: IA Avanzada (Semana 9-12)
+- [ ] WebLLM (IA en navegador)
+- [ ] Vision AI (Ollama)
+- [ ] API externa (OpenAI/Gemini)
+- [ ] Auto-categorización inteligente
+
+### Fase 4: Expansión (Mes 4+)
+- [ ] Plan Gestoría
+- [ ] Multi-usuario con roles
+- [ ] App desktop (Tauri)
+- [ ] Más idiomas
+- [ ] Partnership con gestorías
+
+---
+
+## 📚 Documentos del Proyecto
+
+| Documento | Contenido |
+|-----------|-----------|
+| `BUSINESS_MODEL.md` | Este documento (negocio) |
+| `GO_TO_MARKET.md` | Estrategia de mercado |
+| `PRODUCTION_CHECKLIST.md` | Estado de desarrollo |
+| `docs/TRAINING_GUIDE.md` | Guía de entrenamiento IA |
+| `docs/VERIFACTU_IMPLEMENTATION.md` | Verifactu (para futuro) |

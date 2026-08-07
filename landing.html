@@ -202,6 +202,7 @@
                 0 0 100px rgba(78, 119, 255, 0.2);
             position: relative;
             animation: logoFloat 6s ease-in-out infinite;
+            overflow: hidden;
         }
         .hero-logo::before {
             content: '';
@@ -213,10 +214,10 @@
             animation: logoGlow 4s ease-in-out infinite alternate;
         }
         .hero-logo img {
-            width: 70px;
-            height: 70px;
+            width: 76px;
+            height: 76px;
             object-fit: cover;
-            border-radius: 16px;
+            border-radius: 18px;
         }
         
         @keyframes logoFloat {
@@ -526,7 +527,13 @@
            PRICING
            ============================================ */
         .pricing {
-            background: linear-gradient(180deg, #0a0a0c 0%, #000 100%);
+            background: #ffffff;
+        }
+        .pricing .section-header h2 {
+            color: #1d1d1f;
+        }
+        .pricing .section-header p {
+            color: #6e6e73;
         }
         .pricing-grid {
             display: grid;
@@ -535,19 +542,20 @@
             align-items: start;
         }
         .pricing-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: #f5f5f7;
+            border: 1px solid #e5e5ea;
             border-radius: 16px;
             padding: 32px;
             transition: all 0.3s;
         }
         .pricing-card:hover {
-            border-color: rgba(255,255,255,0.15);
+            border-color: #d2d2d7;
             transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
         }
         .pricing-card.popular {
-            border-color: rgba(78, 119, 255, 0.5);
-            background: rgba(78, 119, 255, 0.05);
+            border-color: #1d1d1f;
+            background: #1d1d1f;
             position: relative;
         }
         .pricing-card.popular::before {
@@ -556,7 +564,7 @@
             top: -12px;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, #4e77ff, #ff77c6);
+            background: #1d1d1f;
             color: white;
             padding: 4px 16px;
             border-radius: 100px;
@@ -566,21 +574,30 @@
         .pricing-card h3 {
             font-size: 18px;
             font-weight: 600;
-            color: white;
+            color: #1d1d1f;
             margin-bottom: 8px;
+        }
+        .pricing-card.popular h3 {
+            color: #ffffff;
         }
         .pricing-price {
             font-size: 48px;
             font-weight: 800;
-            color: white;
+            color: #1d1d1f;
             margin: 16px 0;
             letter-spacing: -2px;
+        }
+        .pricing-card.popular .pricing-price {
+            color: #ffffff;
         }
         .pricing-price span {
             font-size: 16px;
             font-weight: 400;
-            color: rgba(255,255,255,0.4);
+            color: #86868b;
             letter-spacing: 0;
+        }
+        .pricing-card.popular .pricing-price span {
+            color: rgba(255,255,255,0.5);
         }
         .pricing-features {
             list-style: none;
@@ -589,10 +606,13 @@
         .pricing-features li {
             padding: 8px 0;
             font-size: 14px;
-            color: rgba(255,255,255,0.6);
+            color: #6e6e73;
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+        .pricing-card.popular .pricing-features li {
+            color: rgba(255,255,255,0.7);
         }
         .pricing-features li::before {
             content: '✓';
@@ -614,11 +634,11 @@
         }
         .btn-pricing-outline {
             background: transparent;
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
+            color: #1d1d1f;
+            border: 1px solid #d2d2d7;
         }
         .btn-pricing-outline:hover {
-            background: rgba(255,255,255,0.05);
+            background: #e8e8ed;
         }
         .btn-pricing-fill {
             background: white;
@@ -626,7 +646,7 @@
             border: none;
         }
         .btn-pricing-fill:hover {
-            background: rgba(255,255,255,0.9);
+            background: #f5f5f7;
         }
         
         /* ============================================

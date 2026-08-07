@@ -177,7 +177,7 @@ const app = {
             <div class="login-container">
                 <div class="login-card animate-in">
                     <div class="login-logo">
-                        <img src="/public/icons/logo.png" alt="BillSnap" style="width: 56px; height: 56px; object-fit: contain;">
+                        <img src="public/icons/logo.png" alt="BillSnap" style="width: 56px; height: 56px; object-fit: contain;">
                     </div>
                     <h1 class="login-title">BillSnap</h1>
                     <p class="login-subtitle">${i18n.t('app.tagline')}</p>
@@ -240,7 +240,7 @@ const app = {
             <aside class="sidebar ${this.sidebarOpen ? 'open' : ''}" id="sidebar">
                 <div class="sidebar-header">
                     <div class="sidebar-logo">
-                        <img src="/public/icons/logo.png" alt="BillSnap" style="width: 36px; height: 36px; object-fit: contain;">
+                        <img src="public/icons/logo.png" alt="BillSnap" style="width: 36px; height: 36px; object-fit: contain;">
                         <span class="sidebar-logo-text">BillSnap</span>
                     </div>
                 </div>

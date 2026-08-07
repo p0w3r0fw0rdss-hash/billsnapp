@@ -35,8 +35,20 @@
         .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(78,119,255,0.15), transparent 60%); }
         .hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 60px 60px; }
         .hero-content { position: relative; z-index: 2; text-align: center; max-width: 800px; margin: 0 auto; padding: 0 20px; }
-        .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 100px; font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 24px; }
-        .hero-badge-dot { width: 6px; height: 6px; background: #34c759; border-radius: 50%; animation: pulse 2s infinite; }
+        .hero-badge { 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            padding: 10px 20px; 
+            background: rgba(255,255,255,0.1); 
+            border: 1px solid rgba(255,255,255,0.2); 
+            border-radius: 100px; 
+            font-size: 14px; 
+            color: white; 
+            margin-bottom: 28px; 
+            backdrop-filter: blur(10px);
+        }
+        .hero-badge-dot { width: 8px; height: 8px; background: #34c759; border-radius: 50%; animation: pulse 2s infinite; box-shadow: 0 0 8px rgba(52,199,89,0.5); }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .hero h1 { font-size: 64px; font-weight: 900; line-height: 1.05; letter-spacing: -2px; margin-bottom: 20px; }
         .hero-title-brand { display: block; font-size: 80px; margin-bottom: 4px; background: linear-gradient(135deg, #fff, rgba(255,255,255,0.8)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -48,29 +60,180 @@
         .btn-secondary { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; font-size: 15px; font-weight: 600; text-decoration: none; }
         
         /* MOCKUP */
-        .mockup-wrap { margin-top: 60px; max-width: 900px; margin-left: auto; margin-right: auto; }
-        .mockup-frame { background: #111; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
-        .mockup-bar { padding: 10px 14px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 6px; }
-        .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
-        .mockup-body { padding: 16px; display: flex; gap: 12px; min-height: 280px; background: #0a0a0c; }
-        .mockup-side { width: 160px; flex-shrink: 0; }
-        .mockup-side-item { padding: 8px 10px; border-radius: 6px; font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 2px; }
-        .mockup-side-item.active { background: rgba(78,119,255,0.2); color: rgba(78,119,255,0.9); }
+        .mockup-wrap { 
+            margin-top: 60px; 
+            max-width: 950px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            position: relative;
+        }
+        .mockup-glow {
+            position: absolute;
+            inset: -40px;
+            background: radial-gradient(ellipse at center, rgba(78, 119, 255, 0.12), transparent 70%);
+            filter: blur(40px);
+            z-index: 0;
+        }
+        .mockup-frame { 
+            position: relative;
+            z-index: 1;
+            background: #111; 
+            border-radius: 16px; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            overflow: hidden; 
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 20px 60px rgba(0,0,0,0.5), 0 0 80px rgba(78,119,255,0.1); 
+        }
+        .mockup-bar { 
+            padding: 12px 16px; 
+            background: rgba(255,255,255,0.03); 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+        .mockup-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .mockup-url { 
+            flex: 1; 
+            text-align: center; 
+            font-size: 12px; 
+            color: rgba(255,255,255,0.3); 
+            background: rgba(255,255,255,0.03); 
+            padding: 4px 12px; 
+            border-radius: 6px; 
+            margin: 0 40px; 
+        }
+        .mockup-body { 
+            padding: 20px; 
+            display: flex; 
+            gap: 16px; 
+            min-height: 320px; 
+            background: linear-gradient(180deg, #0a0a0c 0%, #08080a 100%); 
+        }
+        .mockup-side { 
+            width: 180px; 
+            flex-shrink: 0; 
+            background: rgba(255,255,255,0.02); 
+            border-radius: 10px; 
+            border: 1px solid rgba(255,255,255,0.04); 
+            padding: 12px 8px; 
+        }
+        .mockup-side-logo { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            padding: 8px 10px; 
+            margin-bottom: 16px; 
+        }
+        .mockup-side-logo-icon {
+            width: 28px;
+            height: 28px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .mockup-side-logo-icon div {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #4e77ff, #ff77c6);
+            border-radius: 4px;
+        }
+        .mockup-side-logo span { font-size: 13px; font-weight: 600; color: white; }
+        .mockup-side-item { 
+            padding: 8px 12px; 
+            border-radius: 8px; 
+            font-size: 12px; 
+            color: rgba(255,255,255,0.4); 
+            margin-bottom: 4px; 
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mockup-side-item.active { 
+            background: rgba(78,119,255,0.15); 
+            color: rgba(78,119,255,0.9); 
+        }
         .mockup-main { flex: 1; min-width: 0; }
-        .mockup-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
-        .mockup-stat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 10px; }
-        .mockup-stat-label { font-size: 9px; color: rgba(255,255,255,0.4); margin-bottom: 4px; }
-        .mockup-stat-value { font-size: 16px; font-weight: 700; color: white; }
+        .mockup-stats { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 10px; 
+            margin-bottom: 14px; 
+        }
+        .mockup-stat { 
+            background: rgba(255,255,255,0.03); 
+            border: 1px solid rgba(255,255,255,0.06); 
+            border-radius: 10px; 
+            padding: 14px; 
+        }
+        .mockup-stat-label { 
+            font-size: 11px; 
+            color: rgba(255,255,255,0.4); 
+            margin-bottom: 6px; 
+        }
+        .mockup-stat-value { 
+            font-size: 20px; 
+            font-weight: 700; 
+            color: white; 
+        }
         .mockup-stat-value.green { color: #34c759; }
         .mockup-stat-value.red { color: #ff3b30; }
-        .mockup-chart { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 6px; padding: 10px; height: 100px; display: flex; align-items: flex-end; gap: 6px; justify-content: space-around; margin-bottom: 10px; }
-        .mockup-bar { width: 10%; border-radius: 3px 3px 0 0; background: linear-gradient(to top, rgba(52,199,89,0.6), rgba(52,199,89,0.2)); }
-        .mockup-table { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 6px; overflow: hidden; }
-        .mockup-table-head { padding: 6px 10px; background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 9px; color: rgba(255,255,255,0.4); font-weight: 600; text-transform: uppercase; }
-        .mockup-row { padding: 6px 10px; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 10px; }
+        .mockup-chart { 
+            background: rgba(255,255,255,0.02); 
+            border: 1px solid rgba(255,255,255,0.04); 
+            border-radius: 10px; 
+            padding: 16px; 
+            height: 120px; 
+            display: flex; 
+            align-items: flex-end; 
+            gap: 10px; 
+            justify-content: space-around; 
+            margin-bottom: 14px; 
+        }
+        .mockup-chart-bar { 
+            flex: 1; 
+            border-radius: 4px 4px 0 0; 
+            background: linear-gradient(to top, rgba(52,199,89,0.7), rgba(52,199,89,0.3)); 
+            transition: height 0.3s;
+        }
+        .mockup-table { 
+            background: rgba(255,255,255,0.02); 
+            border: 1px solid rgba(255,255,255,0.04); 
+            border-radius: 10px; 
+            overflow: hidden; 
+        }
+        .mockup-table-head { 
+            padding: 10px 14px; 
+            background: rgba(255,255,255,0.03); 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+            font-size: 11px; 
+            color: rgba(255,255,255,0.5); 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+        }
+        .mockup-row { 
+            padding: 10px 14px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.03); 
+            font-size: 12px; 
+        }
+        .mockup-row:last-child { border-bottom: none; }
         .mockup-row span { color: rgba(255,255,255,0.6); }
-        .mockup-row .neg { color: rgba(255,59,48,0.7); }
-        .mockup-row .pos { color: rgba(52,199,89,0.7); }
+        .mockup-row .date { color: rgba(255,255,255,0.4); font-size: 11px; }
+        .mockup-row .name { color: rgba(255,255,255,0.8); font-weight: 500; }
+        .mockup-row .neg { color: #ff6b6b; font-weight: 600; }
+        .mockup-row .pos { color: #51cf66; font-weight: 600; }
+        .mockup-row .badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 100px;
+        }
+        .mockup-row .badge-expense { background: rgba(255,59,48,0.15); color: #ff6b6b; }
+        .mockup-row .badge-income { background: rgba(52,199,89,0.15); color: #51cf66; }
         
         /* SECTIONS */
         section { padding: 80px 0; }
@@ -148,6 +311,12 @@
             .cta h2 { font-size: 28px; }
             .mockup-side { display: none; }
             .mockup-stats { grid-template-columns: repeat(2, 1fr); }
+            .mockup-body { padding: 14px; }
+            .mockup-stat { padding: 10px; }
+            .mockup-stat-value { font-size: 16px; }
+            .mockup-chart { height: 80px; padding: 10px; }
+            .mockup-row { padding: 8px 12px; font-size: 11px; }
+            .mockup-row .badge { font-size: 9px; padding: 2px 6px; }
             section { padding: 60px 0; }
             .container { padding: 0 16px; }
         }
@@ -161,7 +330,11 @@
             .mockup-body { padding: 10px; }
             .mockup-stats { grid-template-columns: 1fr 1fr; gap: 6px; }
             .mockup-stat { padding: 8px; }
-            .mockup-stat-value { font-size: 13px; }
+            .mockup-stat-value { font-size: 14px; }
+            .mockup-stat-label { font-size: 9px; }
+            .mockup-chart { height: 60px; padding: 8px; gap: 6px; }
+            .mockup-row { padding: 6px 8px; font-size: 10px; }
+            .mockup-row .name { max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         }
     </style>
 </head>
@@ -252,41 +425,79 @@
 
                 <!-- MOCKUP -->
                 <div class="mockup-wrap">
+                    <div class="mockup-glow"></div>
                     <div class="mockup-frame">
                         <div class="mockup-bar">
                             <div class="mockup-dot" style="background:#ff5f57"></div>
                             <div class="mockup-dot" style="background:#febc2e"></div>
                             <div class="mockup-dot" style="background:#28c840"></div>
-                            <span style="flex:1;text-align:center;font-size:11px;color:rgba(255,255,255,0.3)">BillSnap</span>
+                            <div class="mockup-url">app.billsnap.com/dashboard</div>
                         </div>
                         <div class="mockup-body">
                             <div class="mockup-side">
+                                <div class="mockup-side-logo">
+                                    <div class="mockup-side-logo-icon"><div></div></div>
+                                    <span>BillSnap</span>
+                                </div>
                                 <div class="mockup-side-item active">📊 Dashboard</div>
-                                <div class="mockup-side-item">📤 Subir</div>
+                                <div class="mockup-side-item">📤 Subir Facturas</div>
                                 <div class="mockup-side-item">📋 Facturas</div>
                                 <div class="mockup-side-item">📑 Informes</div>
                                 <div class="mockup-side-item">⚙️ Ajustes</div>
                             </div>
                             <div class="mockup-main">
                                 <div class="mockup-stats">
-                                    <div class="mockup-stat"><div class="mockup-stat-label">Facturas</div><div class="mockup-stat-value">127</div></div>
-                                    <div class="mockup-stat"><div class="mockup-stat-label">Ingresos</div><div class="mockup-stat-value green">+12,450€</div></div>
-                                    <div class="mockup-stat"><div class="mockup-stat-label">Gastos</div><div class="mockup-stat-value red">-4,250€</div></div>
-                                    <div class="mockup-stat"><div class="mockup-stat-label">Beneficio</div><div class="mockup-stat-value green">+8,200€</div></div>
+                                    <div class="mockup-stat">
+                                        <div class="mockup-stat-label">Total Facturas</div>
+                                        <div class="mockup-stat-value">127</div>
+                                    </div>
+                                    <div class="mockup-stat">
+                                        <div class="mockup-stat-label">Ingresos</div>
+                                        <div class="mockup-stat-value green">+12,450€</div>
+                                    </div>
+                                    <div class="mockup-stat">
+                                        <div class="mockup-stat-label">Gastos</div>
+                                        <div class="mockup-stat-value red">-4,250€</div>
+                                    </div>
+                                    <div class="mockup-stat">
+                                        <div class="mockup-stat-label">Beneficio</div>
+                                        <div class="mockup-stat-value green">+8,200€</div>
+                                    </div>
                                 </div>
                                 <div class="mockup-chart">
-                                    <div class="mockup-bar" style="height:35%"></div>
-                                    <div class="mockup-bar" style="height:55%"></div>
-                                    <div class="mockup-bar" style="height:40%"></div>
-                                    <div class="mockup-bar" style="height:75%"></div>
-                                    <div class="mockup-bar" style="height:60%"></div>
-                                    <div class="mockup-bar" style="height:90%"></div>
+                                    <div class="mockup-chart-bar" style="height:35%"></div>
+                                    <div class="mockup-chart-bar" style="height:55%"></div>
+                                    <div class="mockup-chart-bar" style="height:40%"></div>
+                                    <div class="mockup-chart-bar" style="height:75%"></div>
+                                    <div class="mockup-chart-bar" style="height:60%"></div>
+                                    <div class="mockup-chart-bar" style="height:90%"></div>
                                 </div>
                                 <div class="mockup-table">
                                     <div class="mockup-table-head">ÚLTIMAS FACTURAS</div>
-                                    <div class="mockup-row"><span>15/03</span><span>Iberdrola</span><span class="neg">-145,20€</span></div>
-                                    <div class="mockup-row"><span>12/03</span><span>Cliente Juan</span><span class="pos">+1,200€</span></div>
-                                    <div class="mockup-row"><span>10/03</span><span>Movistar</span><span class="neg">-45,00€</span></div>
+                                    <div class="mockup-row">
+                                        <span class="date">15/03/2026</span>
+                                        <span class="name">Iberdrola</span>
+                                        <span class="badge badge-expense">Gasto</span>
+                                        <span class="neg">-145,20€</span>
+                                    </div>
+                                    <div class="mockup-row">
+                                        <span class="date">12/03/2026</span>
+                                        <span class="name">Cliente Juan López</span>
+                                        <span class="badge badge-income">Ingreso</span>
+                                        <span class="pos">+1,200,00€</span>
+                                    </div>
+                                    <div class="mockup-row">
+                                        <span class="date">10/03/2026</span>
+                                        <span class="name">Movistar</span>
+                                        <span class="badge badge-expense">Gasto</span>
+                                        <span class="neg">-45,00€</span>
+                                    </div>
+                                    <div class="mockup-row">
+                                        <span class="date">08/03/2026</span>
+                                        <span class="name">Cliente María García</span>
+                                        <span class="badge badge-income">Ingreso</span>
+                                        <span class="pos">+2,500,00€</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

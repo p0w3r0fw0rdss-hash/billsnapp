@@ -48,7 +48,7 @@
         .nav-logo img {
             width: 28px;
             height: 28px;
-            border-radius: 50%;
+            border-radius: 8px;
             background: white;
             padding: 2px;
         }
@@ -188,10 +188,10 @@
         
         /* Logo in hero */
         .hero-logo {
-            width: 80px;
-            height: 80px;
+            width: 120px;
+            height: 120px;
             background: white;
-            border-radius: 20px;
+            border-radius: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -208,16 +208,16 @@
             content: '';
             position: absolute;
             inset: -2px;
-            border-radius: 22px;
+            border-radius: 30px;
             background: linear-gradient(135deg, rgba(78,119,255,0.5), rgba(255,119,198,0.5));
             z-index: -1;
             animation: logoGlow 4s ease-in-out infinite alternate;
         }
         .hero-logo img {
-            width: 76px;
-            height: 76px;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            border-radius: 18px;
+            border-radius: 26px;
         }
         
         @keyframes logoFloat {
@@ -724,7 +724,7 @@
     <nav>
         <div class="container">
             <a href="#" class="nav-logo">
-                <img src="public/icons/logo.png" alt="BillSnap">
+                <img src="public/icons/logo.jpeg" alt="BillSnap">
                 <span>BillSnap</span>
             </a>
             <div class="nav-links">
@@ -752,7 +752,7 @@
                 </div>
                 
                 <div class="hero-logo">
-                    <img src="public/icons/logo.png" alt="BillSnap">
+                    <img src="public/icons/logo.jpeg" alt="BillSnap" style="width: 100%; height: 100%; object-fit: cover; border-radius: 18px;">
                 </div>
                 
                 <h1>Tus facturas<br><span>se organizan solas</span></h1>

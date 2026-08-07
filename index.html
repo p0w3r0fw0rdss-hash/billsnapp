@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FacturApp - Gestión Inteligente de Facturas</title>
+    <meta name="description" content="App de facturación con OCR inteligente. Sube fotos de facturas y extrae datos automáticamente.">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tesseract.js for OCR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    
+    <!-- Chart.js for dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom styles */
+        .drop-zone {
+            transition: all 0.3s ease;
+        }
+        .drop-zone.drag-over {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            transform: scale(1.02);
+        }
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Table styles */
+        .table-container {
+            overflow-x: auto;
+        }
+        .editable-cell:hover {
+            background-color: #f3f4f6;
+            cursor: pointer;
+        }
+        .editable-cell input {
+            width: 100%;
+            padding: 2px 4px;
+            border: 1px solid #3b82f6;
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+        .toast.success { background-color: #10b981; }
+        .toast.error { background-color: #ef4444; }
+        .toast.info { background-color: #3b82f6; }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- App Container -->
+    <div id="app" class="flex h-screen">
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar w-64 bg-white border-r border-gray-200 flex flex-col fixed md:relative z-40 h-full">
+            <!-- Logo -->
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-gray-900">FacturApp</h1>
+                        <p class="text-xs text-gray-500">Gestión inteligente</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="flex-1 p-4 space-y-1">
+                <button onclick="app.showSection('dashboard')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 transition-colors" data-section="dashboard">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                    </svg>
+                    <span class="text-gray-700">Dashboard</span>
+                </button>
+                
+                <button onclick="app.showSection('upload')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 transition-colors" data-section="upload">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    <span class="text-gray-700">Subir Facturas</span>
+                </button>
+                
+                <button onclick="app.showSection('invoices')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 transition-colors" data-section="invoices">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                    <span class="text-gray-700">Facturas</span>
+                </button>
+                
+                <button onclick="app.showSection('reports')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 transition-colors" data-section="reports">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span class="text-gray-700">Informes</span>
+                </button>
+                
+                <button onclick="app.showSection('settings')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 transition-colors" data-section="settings">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span class="text-gray-700">Configuración</span>
+                </button>
+            </nav>
+            
+            <!-- User Section -->
+            <div class="p-4 border-t border-gray-200">
+                <button onclick="app.showSection('settings')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100">
+                    <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+                        <span class="text-primary-600 font-semibold text-sm">U</span>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-sm font-medium text-gray-700">Usuario</p>
+                        <p class="text-xs text-gray-500">Plan Free</p>
+                    </div>
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="flex-1 overflow-auto">
+            <!-- Top Bar -->
+            <header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+                <button id="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')" class="md:hidden p-2 rounded-lg hover:bg-gray-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+                
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <input type="text" placeholder="Buscar facturas..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent w-64">
+                        <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    
+                    <button onclick="app.showSection('upload')" class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span>Nueva factura</span>
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Content Sections -->
+            <div class="p-6">
+                
+                <!-- DASHBOARD SECTION -->
+                <section id="section-dashboard" class="section hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Dashboard</h2>
+                    
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">Total Facturas</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="stat-total-invoices">0</p>
+                                </div>
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">Total Importe</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="stat-total-amount">0,00 €</p>
+                                </div>
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">IVA Acumulado</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="stat-total-iva">0,00 €</p>
+                                </div>
+                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">Facturas Pendientes</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="stat-pending">0</p>
+                                </div>
+                                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts Row -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <h3 class="font-semibold text-gray-900 mb-4">Ingresos por Mes</h3>
+                            <canvas id="chart-monthly" height="200"></canvas>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <h3 class="font-semibold text-gray-900 mb-4">Gastos por Categoría</h3>
+                            <canvas id="chart-categories" height="200"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Invoices -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                        <div class="p-6 border-b border-gray-100">
+                            <h3 class="font-semibold text-gray-900">Últimas Facturas</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nº Factura</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Emisor</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-invoices-body" class="divide-y divide-gray-100">
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                                            No hay facturas todavía. ¡Sube tu primera factura!
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- UPLOAD SECTION -->
+                <section id="section-upload" class="section">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Subir Facturas</h2>
+                    
+                    <!-- OCR Engine Selection -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+                        <h3 class="font-semibold text-gray-900 mb-4">Motor OCR</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="ocr-engine" value="tesseract" checked class="peer sr-only">
+                                <div class="border-2 border-gray-200 rounded-xl p-4 peer-checked:border-primary-500 peer-checked:bg-primary-50 transition-all">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900">Tesseract.js</p>
+                                            <p class="text-xs text-gray-500">Local · Gratis</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Precisión: ⭐⭐⭐</p>
+                                </div>
+                            </label>
+                            
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="ocr-engine" value="ollama" class="peer sr-only">
+                                <div class="border-2 border-gray-200 rounded-xl p-4 peer-checked:border-primary-500 peer-checked:bg-primary-50 transition-all">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900">Ollama</p>
+                                            <p class="text-xs text-gray-500">Local · GPU</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Precisión: ⭐⭐⭐⭐</p>
+                                </div>
+                            </label>
+                            
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="ocr-engine" value="api" class="peer sr-only">
+                                <div class="border-2 border-gray-200 rounded-xl p-4 peer-checked:border-primary-500 peer-checked:bg-primary-50 transition-all">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900">API Externa</p>
+                                            <p class="text-xs text-gray-500">Tu API key</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Precisión: ⭐⭐⭐⭐⭐</p>
+                                </div>
+                            </label>
+                            
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="ocr-engine" value="native" class="peer sr-only">
+                                <div class="border-2 border-gray-200 rounded-xl p-4 peer-checked:border-primary-500 peer-checked:bg-primary-50 transition-all">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900">IA Nativa</p>
+                                            <p class="text-xs text-gray-500">Premium</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Precisión: ⭐⭐⭐⭐⭐</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Drop Zone -->
+                    <div id="drop-zone" class="drop-zone bg-white rounded-xl border-2 border-dashed border-gray-300 p-12 text-center cursor-pointer transition-all hover:border-primary-400">
+                        <div class="flex flex-col items-center">
+                            <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <p class="text-lg font-medium text-gray-700 mb-2">Arrastra hasta 30 facturas aquí</p>
+                            <p class="text-sm text-gray-500 mb-4">JPG, PNG, PDF, HEIC, WebP</p>
+                            <button onclick="document.getElementById('file-input').click()" class="bg-primary-600 text-white px-6 py-2.5 rounded-lg hover:bg-primary-700 transition-colors">
+                                Seleccionar archivos
+                            </button>
+                        </div>
+                        <input type="file" id="file-input" multiple accept="image/*,.pdf" class="hidden">
+                    </div>
+                    
+                    <!-- Upload Queue -->
+                    <div id="upload-queue" class="mt-6 hidden">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                                <h3 class="font-semibold text-gray-900">Cola de procesamiento</h3>
+                                <div class="flex items-center gap-4">
+                                    <span id="queue-progress" class="text-sm text-gray-500">0/0 procesadas</span>
+                                    <button id="process-btn" onclick="app.processQueue()" class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors text-sm">
+                                        Procesar todas
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Overall Progress -->
+                            <div class="px-4 py-3 bg-gray-50">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-sm text-gray-600">Progreso total</span>
+                                    <span id="overall-percent" class="text-sm font-medium text-primary-600">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div id="overall-progress" class="progress-bar bg-primary-600 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- File List -->
+                            <div id="file-list" class="divide-y divide-gray-100 max-h-96 overflow-y-auto">
+                                <!-- Files will be added here dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Extracted Data Preview -->
+                    <div id="extracted-preview" class="mt-6 hidden">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                                <h3 class="font-semibold text-gray-900">Datos extraídos</h3>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="app.saveExtracted()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm">
+                                        Guardar todas
+                                    </button>
+                                    <button onclick="app.discardExtracted()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors text-sm">
+                                        Descartar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Preview</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nº Factura</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Emisor</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Base</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">IVA</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="extracted-body" class="divide-y divide-gray-100">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- INVOICES SECTION -->
+                <section id="section-invoices" class="section hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">Facturas</h2>
+                        <div class="flex items-center gap-3">
+                            <select id="filter-year" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                <option value="">Todos los años</option>
+                            </select>
+                            <select id="filter-month" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                <option value="">Todos los meses</option>
+                                <option value="01">Enero</option>
+                                <option value="02">Febrero</option>
+                                <option value="03">Marzo</option>
+                                <option value="04">Abril</option>
+                                <option value="05">Mayo</option>
+                                <option value="06">Junio</option>
+                                <option value="07">Julio</option>
+                                <option value="08">Agosto</option>
+                                <option value="09">Septiembre</option>
+                                <option value="10">Octubre</option>
+                                <option value="11">Noviembre</option>
+                                <option value="12">Diciembre</option>
+                            </select>
+                            <button onclick="app.exportCSV()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                CSV
+                            </button>
+                            <button onclick="app.exportJSON()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                JSON
+                            </button>
+                            <button onclick="app.generatePDFReport()" class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors text-sm flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                </svg>
+                                PDF
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Invoices Table -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                        <div class="table-container">
+                            <table class="w-full">
+                                <thead class="bg-gray-50 sticky top-0">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            <input type="checkbox" id="select-all" class="rounded">
+                                        </th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700" onclick="app.sortBy('date')">
+                                            Fecha <span class="sort-icon">↕</span>
+                                        </th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nº Factura</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Emisor</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Receptor</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Concepto</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700" onclick="app.sortBy('base')">
+                                            Base <span class="sort-icon">↕</span>
+                                        </th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">IVA %</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">IVA €</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700" onclick="app.sortBy('total')">
+                                            Total <span class="sort-icon">↕</span>
+                                        </th>
+                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoices-body" class="divide-y divide-gray-100">
+                                    <tr>
+                                        <td colspan="12" class="px-6 py-12 text-center text-gray-500">
+                                            <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                            <p class="font-medium">No hay facturas</p>
+                                            <p class="text-sm mt-1">Sube tu primera factura para empezar</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Table Footer with Totals -->
+                        <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                            <span id="invoice-count" class="text-sm text-gray-600">0 facturas</span>
+                            <div class="flex items-center gap-6">
+                                <span class="text-sm text-gray-600">Total base: <strong id="total-base">0,00 €</strong></span>
+                                <span class="text-sm text-gray-600">Total IVA: <strong id="total-iva">0,00 €</strong></span>
+                                <span class="text-sm text-gray-900 font-semibold">Total: <strong id="total-amount">0,00 €</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- REPORTS SECTION -->
+                <section id="section-reports" class="section hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Informes</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Monthly Report -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-semibold text-gray-900 mb-2">Informe Mensual</h3>
+                            <p class="text-sm text-gray-600 mb-4">Resumen de todas las facturas del mes seleccionado</p>
+                            <div class="flex items-center gap-2 mb-4">
+                                <select id="report-month" class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1">
+                                    <option value="01">Enero</option>
+                                    <option value="02">Febrero</option>
+                                    <option value="03">Marzo</option>
+                                    <option value="04">Abril</option>
+                                    <option value="05">Mayo</option>
+                                    <option value="06">Junio</option>
+                                    <option value="07">Julio</option>
+                                    <option value="08">Agosto</option>
+                                    <option value="09">Septiembre</option>
+                                    <option value="10">Octubre</option>
+                                    <option value="11">Noviembre</option>
+                                    <option value="12">Diciembre</option>
+                                </select>
+                                <select id="report-year" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                </select>
+                            </div>
+                            <button onclick="app.generateMonthlyReport()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
+                                Generar PDF
+                            </button>
+                        </div>
+                        
+                        <!-- Quarterly Report -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-semibold text-gray-900 mb-2">Informe Trimestral</h3>
+                            <p class="text-sm text-gray-600 mb-4">Liquidación de IVA (Modelo 303)</p>
+                            <div class="flex items-center gap-2 mb-4">
+                                <select id="report-quarter" class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1">
+                                    <option value="1">Q1 (Ene-Mar)</option>
+                                    <option value="2">Q2 (Abr-Jun)</option>
+                                    <option value="3">Q3 (Jul-Sep)</option>
+                                    <option value="4">Q4 (Oct-Dic)</option>
+                                </select>
+                                <select id="report-quarter-year" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                </select>
+                            </div>
+                            <button onclick="app.generateQuarterlyReport()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
+                                Generar PDF
+                            </button>
+                        </div>
+                        
+                        <!-- Annual Report -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-semibold text-gray-900 mb-2">Informe Anual</h3>
+                            <p class="text-sm text-gray-600 mb-4">Resumen ejecutivo del año completo</p>
+                            <div class="flex items-center gap-2 mb-4">
+                                <select id="report-annual-year" class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1">
+                                </select>
+                            </div>
+                            <button onclick="app.generateAnnualReport()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
+                                Generar PDF
+                            </button>
+                        </div>
+                        
+                        <!-- Invoice PDF -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-semibold text-gray-900 mb-2">Factura Individual</h3>
+                            <p class="text-sm text-gray-600 mb-4">Generar PDF de una factura específica</p>
+                            <button onclick="app.showInvoiceSelector()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
+                                Seleccionar factura
+                            </button>
+                        </div>
+                        
+                        <!-- Tax Report -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-semibold text-gray-900 mb-2">Resumen Fiscal</h3>
+                            <p class="text-sm text-gray-600 mb-4">IVA repercutido vs soportado</p>
+                            <div class="flex items-center gap-2 mb-4">
+                                <select id="report-tax-year" class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1">
+                                </select>
+                            </div>
+                            <button onclick="app.generateTaxReport()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
+                                Generar PDF
+                            </button>
+                        </div>
+                        
+                        <!-- Accounting Book -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
+                                <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-semibold text-gray-900 mb-2">Libro Contable</h3>
+                            <p class="text-sm text-gray-600 mb-4">Ingresos y gastos completos</p>
+                            <div class="flex items-center gap-2 mb-4">
+                                <select id="report-book-year" class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1">
+                                </select>
+                            </div>
+                            <button onclick="app.generateAccountingBook()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
+                                Generar PDF
+                            </button>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- SETTINGS SECTION -->
+                <section id="section-settings" class="section hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Configuración</h2>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Company Data -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <h3 class="font-semibold text-gray-900 mb-4">Datos de tu empresa</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre / Razón social</label>
+                                    <input type="text" id="company-name" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Mi Empresa S.L.">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">NIF / CIF</label>
+                                    <input type="text" id="company-nif" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="B-12345678">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                                    <input type="text" id="company-address" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Calle Mayor 1, 28001 Madrid">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <input type="email" id="company-email" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="facturas@miempresa.com">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                                    <input type="tel" id="company-phone" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="+34 912 345 678">
+                                </div>
+                                <button onclick="app.saveCompanyData()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
+                                    Guardar datos
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- AI Configuration -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <h3 class="font-semibold text-gray-900 mb-4">Configuración IA</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor de IA externa</label>
+                                    <select id="ai-provider" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                                        <option value="">Seleccionar proveedor</option>
+                                        <option value="openai">OpenAI</option>
+                                        <option value="gemini">Google Gemini</option>
+                                        <option value="huggingface">HuggingFace</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+                                    <input type="password" id="ai-api-key" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="sk-...">
+                                    <p class="text-xs text-gray-500 mt-1">Tu API key se guarda localmente en tu navegador</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">URL Ollama (si usas local)</label>
+                                    <input type="text" id="ollama-url" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="http://localhost:11434">
+                                </div>
+                                <button onclick="app.saveAIConfig()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
+                                    Guardar configuración
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Google Sheets -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <h3 class="font-semibold text-gray-900 mb-4">Google Sheets</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">URL del Google Sheet</label>
+                                    <input type="url" id="sheets-url" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="https://docs.google.com/spreadsheets/d/...">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">API Key de Google</label>
+                                    <input type="password" id="sheets-api-key" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="AIza...">
+                                </div>
+                                <button onclick="app.connectSheets()" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                    Conectar Sheets
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Email Configuration -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <h3 class="font-semibold text-gray-900 mb-4">Configuración Email</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Método de envío</label>
+                                    <select id="email-method" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                                        <option value="mailto">Abrir cliente de correo (Mailto)</option>
+                                        <option value="smtp">SMTP directo</option>
+                                        <option value="sendgrid">SendGrid API</option>
+                                    </select>
+                                </div>
+                                <div id="smtp-config" class="space-y-3 hidden">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Servidor SMTP</label>
+                                        <input type="text" id="smtp-host" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="smtp.gmail.com">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Puerto</label>
+                                        <input type="number" id="smtp-port" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="587">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
+                                        <input type="email" id="smtp-user" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="tu@gmail.com">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña de aplicación</label>
+                                        <input type="password" id="smtp-pass" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="xxxx xxxx xxxx xxxx">
+                                    </div>
+                                </div>
+                                <div id="sendgrid-config" class="hidden">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">SendGrid API Key</label>
+                                    <input type="password" id="sendgrid-key" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="SG.xxx">
+                                </div>
+                                <button onclick="app.saveEmailConfig()" class="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors">
+                                    Guardar configuración
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Data Management -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <h3 class="font-semibold text-gray-900 mb-4">Gestión de datos</h3>
+                            <div class="space-y-3">
+                                <button onclick="app.exportJSON()" class="w-full bg-white border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    Exportar backup (JSON)
+                                </button>
+                                <button onclick="document.getElementById('import-input').click()" class="w-full bg-white border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                    </svg>
+                                    Importar backup (JSON)
+                                </button>
+                                <input type="file" id="import-input" accept=".json" class="hidden" onchange="app.importJSON(event)">
+                                <button onclick="app.clearAllData()" class="w-full bg-red-50 border border-red-200 text-red-700 py-2 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    Borrar todos los datos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+            </div>
+        </main>
+    </div>
+    
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+    
+    <!-- Modal Container -->
+    <div id="modal-overlay" class="modal-overlay" onclick="if(event.target===this) app.closeModal()">
+        <div id="modal-content" class="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="src/js/utils/helpers.js"></script>
+    <script src="src/js/storage/indexeddb.js"></script>
+    <script src="src/js/ocr/tesseract-ocr.js"></script>
+    <script src="src/js/ocr/ai-api.js"></script>
+    <script src="src/js/pdf/generator.js"></script>
+    <script src="src/js/app.js"></script>
+</body>
+</html>

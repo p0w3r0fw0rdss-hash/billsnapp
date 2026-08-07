@@ -24,8 +24,21 @@ const app = {
             await DB.init();
             console.log('Database initialized');
 
+            // Initialize authentication
+            const currentUser = await Auth.init();
+            
+            // Check if user is logged in
+            if (!Auth.isLoggedIn()) {
+                // Show login screen
+                document.getElementById('app').innerHTML = Auth.renderLoginForm();
+                return;
+            }
+
             // Load AI configuration
             await AIAPI.loadConfig();
+
+            // Load Google Sheets configuration
+            await GoogleSheets.loadConfig();
 
             // Set up event listeners
             this.setupEventListeners();
@@ -39,6 +52,9 @@ const app = {
             // Set current month in report selectors
             this.setCurrentPeriod();
 
+            // Update user info in sidebar
+            this.updateUserUI();
+
             // Show default section
             this.showSection('upload');
 
@@ -49,10 +65,24 @@ const app = {
                 await this.loadInvoices();
             }
 
-            Helpers.showToast('FacturApp iniciada correctamente', 'success');
+            Helpers.showToast(`Bienvenido, ${currentUser.name}`, 'success');
         } catch (error) {
             console.error('Error initializing app:', error);
             Helpers.showToast('Error al iniciar la aplicación', 'error');
+        }
+    },
+
+    /**
+     * Update user UI elements
+     */
+    updateUserUI() {
+        const user = Auth.getCurrentUser();
+        if (!user) return;
+
+        // Update sidebar user section
+        const userSection = document.querySelector('.sidebar .border-t');
+        if (userSection) {
+            userSection.innerHTML = Auth.renderUserInfo().replace('<div class="p-4 border-t border-gray-200">', '').replace('</div>', '');
         }
     },
 
@@ -104,6 +134,12 @@ const app = {
      * Show a section
      */
     showSection(sectionId) {
+        // Check permissions
+        if (!Auth.hasPermission('view') && sectionId !== 'settings') {
+            Helpers.showToast('No tienes permisos para acceder a esta sección', 'error');
+            return;
+        }
+
         // Hide all sections
         document.querySelectorAll('.section').forEach(section => {
             section.classList.add('hidden');
@@ -128,6 +164,14 @@ const app = {
         // Load section data if needed
         if (sectionId === 'dashboard') this.loadDashboard();
         if (sectionId === 'invoices') this.loadInvoices();
+        
+        // Load user management if on settings page and user is admin
+        if (sectionId === 'settings' && Auth.hasPermission('users')) {
+            const userMgmt = document.getElementById('user-management');
+            if (userMgmt) {
+                userMgmt.innerHTML = Auth.renderUserManagement();
+            }
+        }
     },
 
     /**
@@ -1225,8 +1269,72 @@ const app = {
     },
 
     async connectSheets() {
-        // Placeholder for Google Sheets connection
-        Helpers.showToast('Función de Google Sheets próximamente', 'info');
+        try {
+            const url = document.getElementById('sheets-url').value;
+            const apiKey = document.getElementById('sheets-api-key').value;
+
+            if (!url) {
+                Helpers.showToast('Introduce la URL del Google Sheet', 'error');
+                return;
+            }
+
+            const spreadsheetId = GoogleSheets.extractSpreadsheetId(url);
+            await GoogleSheets.saveConfig(spreadsheetId, apiKey);
+
+            // Initialize sheet with headers
+            await GoogleSheets.initializeSheet();
+
+            // Sync existing invoices
+            const result = await GoogleSheets.syncAllInvoices();
+            
+            Helpers.showToast(`Conectado a Google Sheets. ${result.count} facturas sincronizadas.`, 'success');
+        } catch (error) {
+            console.error('Error connecting to Sheets:', error);
+            Helpers.showToast('Error al conectar con Google Sheets: ' + error.message, 'error');
+        }
+    },
+
+    async syncToSheets() {
+        try {
+            if (!GoogleSheets.config.connected) {
+                Helpers.showToast('Primero conecta Google Sheets', 'error');
+                return;
+            }
+
+            const result = await GoogleSheets.syncAllInvoices();
+            Helpers.showToast(`${result.count} facturas sincronizadas con Google Sheets`, 'success');
+        } catch (error) {
+            Helpers.showToast('Error al sincronizar: ' + error.message, 'error');
+        }
+    },
+
+    async importFromSheets() {
+        try {
+            if (!GoogleSheets.config.connected) {
+                Helpers.showToast('Primero conecta Google Sheets', 'error');
+                return;
+            }
+
+            if (!confirm('¿Importar facturas desde Google Sheets? Se añadirán a las existentes.')) return;
+
+            const result = await GoogleSheets.importFromSheets();
+            
+            await this.loadInvoices();
+            await this.loadDashboard();
+            
+            Helpers.showToast(`${result.count} facturas importadas desde Google Sheets`, 'success');
+        } catch (error) {
+            Helpers.showToast('Error al importar: ' + error.message, 'error');
+        }
+    },
+
+    openSheetsView() {
+        const url = GoogleSheets.generateSheetViewUrl();
+        if (url) {
+            window.open(url, '_blank');
+        } else {
+            Helpers.showToast('Primero conecta Google Sheets', 'error');
+        }
     },
 
     async saveEmailConfig() {

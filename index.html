@@ -816,10 +816,26 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">API Key de Google</label>
                                     <input type="password" id="sheets-api-key" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="AIza...">
+                                    <p class="text-xs text-gray-500 mt-1">Obtén tu API key en <a href="https://console.cloud.google.com" target="_blank" class="text-primary-600 hover:underline">Google Cloud Console</a></p>
                                 </div>
-                                <button onclick="app.connectSheets()" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors">
-                                    Conectar Sheets
-                                </button>
+                                <div class="flex gap-2">
+                                    <button onclick="app.connectSheets()" class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                        Conectar y Sincronizar
+                                    </button>
+                                    <button onclick="app.openSheetsView()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors" title="Abrir en Google Sheets">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="app.syncToSheets()" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                                        Sincronizar a Sheets
+                                    </button>
+                                    <button onclick="app.importFromSheets()" class="flex-1 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm">
+                                        Importar desde Sheets
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         
@@ -889,6 +905,11 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- User Management Section -->
+                    <div class="mt-6" id="user-management">
+                        <!-- Will be populated by Auth.renderUserManagement() -->
+                    </div>
                 </section>
                 
             </div>
@@ -907,9 +928,11 @@
     <!-- Scripts -->
     <script src="src/js/utils/helpers.js"></script>
     <script src="src/js/storage/indexeddb.js"></script>
+    <script src="src/js/storage/sheets.js"></script>
     <script src="src/js/ocr/tesseract-ocr.js"></script>
     <script src="src/js/ocr/ai-api.js"></script>
     <script src="src/js/pdf/generator.js"></script>
+    <script src="src/js/auth/auth.js"></script>
     <script src="src/js/app.js"></script>
 </body>
 </html>

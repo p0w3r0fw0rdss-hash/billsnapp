@@ -86,6 +86,33 @@
             cursor: pointer; transition: all 0.2s;
         }
         .lang-btn:hover { background: rgba(255,215,0,0.1); color: var(--gold); }
+        .version-toggle {
+            display: inline-flex;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,215,0,0.15);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 32px;
+        }
+        .version-btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+            color: rgba(255,255,255,0.5);
+            font-family: inherit;
+        }
+        .version-btn.active {
+            background: var(--gold);
+            color: var(--black);
+            box-shadow: 0 2px 8px rgba(255,215,0,0.3);
+        }
+        .pricing-section { display: none; }
+        .pricing-section.active { display: block; }
 
         /* ============================================
            HERO
@@ -811,32 +838,111 @@
                 <h2 data-t="p.title">Precios simples</h2>
                 <p data-t="p.sub">Empieza gratis. Escala cuando necesites.</p>
             </div>
-            <div class="price-grid">
-                <div class="price-card">
-                    <h3 data-t="p.free">Free</h3>
-                    <div class="price-val">0€ <span data-t="p.month">/mes</span></div>
-                    <ul class="price-list"><li>20 facturas/mes</li><li>OCR básico</li><li>Tabla organizada</li><li>Exportar CSV</li></ul>
-                    <a href="/app" class="btn-price" data-t="p.free.cta">Empezar gratis</a>
-                </div>
-                <div class="price-card popular">
-                    <h3 data-t="p.auto">Autónomo</h3>
-                    <div class="price-val">9€ <span data-t="p.month">/mes</span></div>
-                    <ul class="price-list"><li>100 facturas/mes</li><li>IA nativa incluida</li><li>Informes PDF</li><li>Categorías ilimitadas</li></ul>
-                    <a href="/app" class="btn-price fill" data-t="p.cta">Elegir plan</a>
-                </div>
-                <div class="price-card">
-                    <h3 data-t="p.pyme">PYME</h3>
-                    <div class="price-val">19€ <span data-t="p.month">/mes</span></div>
-                    <ul class="price-list"><li>500 facturas/mes</li><li>3 usuarios</li><li>Multi-empresa</li><li>Soporte prioritario</li></ul>
-                    <a href="/app" class="btn-price" data-t="p.cta">Elegir plan</a>
-                </div>
-                <div class="price-card">
-                    <h3 data-t="p.gest">Gestoría</h3>
-                    <div class="price-val">49€ <span data-t="p.month">/mes</span></div>
-                    <ul class="price-list"><li>5,000 facturas/mes</li><li>10 usuarios</li><li>Multi-empresa</li><li>Soporte dedicado</li></ul>
-                    <a href="/app" class="btn-price" data-t="p.cta">Elegir plan</a>
+            <!-- Version Toggle -->
+            <div style="text-align: center; margin-bottom: 40px;">
+                <div class="version-toggle">
+                    <button class="version-btn active" onclick="showVersion('local', this)">🖥️ Local</button>
+                    <button class="version-btn" onclick="showVersion('cloud', this)">☁️ Cloud</button>
                 </div>
             </div>
+
+            <!-- LOCAL PRICING -->
+            <div id="pricing-local" class="pricing-section active">
+                <p style="text-align: center; color: rgba(255,255,255,0.45); font-size: 14px; margin-bottom: 32px;">Descarga la app, instálala en tu PC. Funciona 100% offline.</p>
+                <div class="price-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 700px; margin: 0 auto;">
+                    <div class="price-card">
+                        <h3>Starter</h3>
+                        <div class="price-val">395€ <span>pago único</span></div>
+                        <ul class="price-list">
+                            <li>App de escritorio</li>
+                            <li>500 facturas IA incluidas</li>
+                            <li>Packs: 1€/500 facturas extra</li>
+                            <li>OCR Tesseract</li>
+                            <li>Informes PDF</li>
+                            <li>1 usuario, 1 empresa</li>
+                        </ul>
+                        <a href="/app" class="btn-price">Comprar</a>
+                    </div>
+                    <div class="price-card popular">
+                        <h3>Pro</h3>
+                        <div class="price-val">895€ <span>pago único</span></div>
+                        <ul class="price-list">
+                            <li>Todo lo del Starter</li>
+                            <li>Facturas ilimitadas</li>
+                            <li>API libre (OpenAI, Gemini...)</li>
+                            <li>Ollama integrado</li>
+                            <li>Instalación incluida</li>
+                            <li>3 usuarios, 5 empresas</li>
+                            <li>Mantenimiento: 99€/año</li>
+                        </ul>
+                        <a href="/app" class="btn-price fill">Comprar</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CLOUD PRICING -->
+            <div id="pricing-cloud" class="pricing-section">
+                <p style="text-align: center; color: rgba(255,255,255,0.45); font-size: 14px; margin-bottom: 32px;">Sin instalar nada. Accede desde cualquier dispositivo.</p>
+                <div class="price-grid">
+                    <div class="price-card">
+                        <h3>Free</h3>
+                        <div class="price-val">0€ <span>/mes</span></div>
+                        <ul class="price-list">
+                            <li>20 facturas/mes</li>
+                            <li>OCR básico (Tesseract)</li>
+                            <li>Tabla organizada</li>
+                            <li>Exportar CSV</li>
+                            <li>1 usuario, 1 empresa</li>
+                        </ul>
+                        <a href="/app" class="btn-price">Empezar gratis</a>
+                    </div>
+                    <div class="price-card popular">
+                        <h3>Autónomo</h3>
+                        <div class="price-val">9€ <span>/mes</span></div>
+                        <ul class="price-list">
+                            <li>100 facturas/mes</li>
+                            <li>IA nativa (Gemini Flash)</li>
+                            <li>Informes PDF</li>
+                            <li>Guardar fotos/PDFs</li>
+                            <li>1 usuario, 1 empresa</li>
+                        </ul>
+                        <a href="/app" class="btn-price fill">Elegir plan</a>
+                    </div>
+                    <div class="price-card">
+                        <h3>PYME</h3>
+                        <div class="price-val">19€ <span>/mes</span></div>
+                        <ul class="price-list">
+                            <li>500 facturas/mes</li>
+                            <li>IA nativa + API propia</li>
+                            <li>3 usuarios, 1 empresa</li>
+                            <li>Multi-empresa (+15€/mes)</li>
+                            <li>Soporte prioritario</li>
+                        </ul>
+                        <a href="/app" class="btn-price">Elegir plan</a>
+                    </div>
+                    <div class="price-card">
+                        <h3>Gestoría</h3>
+                        <div class="price-val">49€ <span>/mes</span></div>
+                        <ul class="price-list">
+                            <li>5,000 facturas/mes</li>
+                            <li>10 usuarios, 5 empresas</li>
+                            <li>IA nativa + API + Ollama</li>
+                            <li>Exportar carpeta facturas</li>
+                            <li>Soporte dedicado</li>
+                        </ul>
+                        <a href="/app" class="btn-price">Elegir plan</a>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                function showVersion(v, btn) {
+                    document.querySelectorAll('.version-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.querySelectorAll('.pricing-section').forEach(s => s.classList.remove('active'));
+                    document.getElementById('pricing-' + v).classList.add('active');
+                }
+            </script>
         </div>
     </section>
 

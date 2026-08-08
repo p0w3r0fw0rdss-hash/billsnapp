@@ -5,310 +5,142 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BillsnApp - Organiza tus facturas automáticamente</title>
     <meta name="description" content="Sube fotos de facturas y organízalas automáticamente. Contabilidad automática para autónomos y PYMES.">
-    <meta name="theme-color" content="#000000">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="public/icons/logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --yellow: #FFD700;
-            --yellow-light: #FFF8DC;
-            --yellow-dark: #DAA520;
-            --black: #000000;
-            --white: #FFFFFF;
-            --gray-100: #f5f5f5;
-            --gray-200: #e5e5e5;
-            --gray-300: #d4d4d4;
-            --gray-400: #a3a3a3;
-            --gray-500: #737373;
-            --gray-600: #525252;
-            --gray-700: #404040;
-            --gray-800: #262626;
-            --gray-900: #171717;
-        }
-        
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
-        body { font-family: 'Inter', -apple-system, sans-serif; color: var(--gray-900); background: var(--white); line-height: 1.5; overflow-x: hidden; }
+        body { font-family: 'Inter', -apple-system, sans-serif; overflow-x: hidden; }
         
         .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         
         /* NAV */
-        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 12px 0; backdrop-filter: blur(20px); background: rgba(0,0,0,0.9); border-bottom: 1px solid rgba(255,215,0,0.2); }
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 14px 0; background: #000; border-bottom: 1px solid rgba(255,215,0,0.15); }
         nav .container { display: flex; align-items: center; justify-content: space-between; }
-        .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--white); }
-        .nav-logo img { width: 32px; height: 32px; border-radius: 50%; background: var(--white); padding: 2px; }
-        .nav-logo span { font-weight: 700; font-size: 16px; color: var(--yellow); }
-        .nav-links { display: flex; align-items: center; gap: 20px; }
-        .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
-        .nav-links a:hover { color: var(--yellow); }
-        .nav-cta { background: var(--yellow); color: var(--black) !important; padding: 8px 16px; border-radius: 8px; font-weight: 600; transition: all 0.2s; }
-        .nav-cta:hover { background: var(--yellow-dark); transform: translateY(-1px); }
-        .lang-btn { display: flex; align-items: center; gap: 4px; background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 6px; padding: 6px 10px; cursor: pointer; color: var(--yellow); font-size: 12px; }
+        .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .nav-logo img { width: 34px; height: 34px; border-radius: 50%; }
+        .nav-logo span { font-weight: 800; font-size: 18px; color: #FFD700; letter-spacing: -0.5px; }
+        .nav-links { display: flex; align-items: center; gap: 28px; }
+        .nav-links a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: #FFD700; }
+        .nav-cta { background: #FFD700; color: #000 !important; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; }
+        .nav-cta:hover { background: #e6c200; }
+        .lang-btn { display: flex; align-items: center; gap: 6px; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.2); border-radius: 8px; padding: 7px 12px; cursor: pointer; color: #FFD700; font-size: 13px; font-weight: 500; }
         
         /* HERO */
-        .hero { min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; padding: 100px 0 60px; }
-        .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(78,119,255,0.15), transparent 60%); }
-        .hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 60px 60px; }
-        .hero-content { position: relative; z-index: 2; text-align: center; max-width: 900px; margin: 0 auto; padding: 0 24px; overflow: visible; }
-        .hero-badge { 
-            display: inline-flex; 
-            align-items: center; 
-            gap: 8px; 
-            padding: 10px 20px; 
-            background: rgba(255,255,255,0.1); 
-            border: 1px solid rgba(255,255,255,0.2); 
-            border-radius: 100px; 
-            font-size: 14px; 
-            color: white; 
-            margin-bottom: 28px; 
-            backdrop-filter: blur(10px);
-        }
-        .hero-badge-dot { width: 8px; height: 8px; background: #34c759; border-radius: 50%; animation: pulse 2s infinite; box-shadow: 0 0 8px rgba(52,199,89,0.5); }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .hero h1 { font-size: 64px; font-weight: 900; line-height: 1.05; letter-spacing: -2px; margin-bottom: 20px; }
-        .hero-title-brand { display: block; font-size: 80px; margin-bottom: 4px; background: linear-gradient(135deg, #fff, rgba(255,255,255,0.8)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero h1 span:not(.hero-title-brand) { background: linear-gradient(135deg, #4e77ff, #ff77c6, #4effc6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero p { font-size: 18px; color: rgba(255,255,255,0.5); max-width: 550px; margin: 0 auto 36px; line-height: 1.6; }
-        .hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-        .btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: white; color: #000; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; text-decoration: none; transition: transform 0.2s; }
-        .btn-primary:hover { transform: translateY(-2px); }
-        .btn-secondary { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; font-size: 15px; font-weight: 600; text-decoration: none; }
+        .hero { min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; background: #000; }
+        .hero-glow { position: absolute; top: -200px; left: 50%; transform: translateX(-50%); width: 800px; height: 600px; background: radial-gradient(ellipse, rgba(255,215,0,0.12) 0%, transparent 70%); pointer-events: none; }
+        .hero-content { position: relative; z-index: 2; text-align: center; max-width: 750px; margin: 0 auto; padding: 120px 20px 80px; }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.2); border-radius: 100px; font-size: 13px; color: #FFD700; font-weight: 500; margin-bottom: 32px; }
+        .hero-badge-dot { width: 6px; height: 6px; background: #FFD700; border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .hero-title { font-size: 72px; font-weight: 900; line-height: 1; letter-spacing: -3px; margin-bottom: 8px; color: #FFD700; }
+        .hero-subtitle { font-size: 22px; font-weight: 500; color: #fff; line-height: 1.4; margin-bottom: 12px; letter-spacing: -0.5px; }
+        .hero-desc { font-size: 16px; color: rgba(255,255,255,0.5); max-width: 500px; margin: 0 auto 40px; line-height: 1.6; }
+        .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .btn-gold { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: #FFD700; color: #000; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; text-decoration: none; transition: all 0.2s; cursor: pointer; }
+        .btn-gold:hover { background: #e6c200; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,215,0,0.25); }
+        .btn-outline { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 15px; font-weight: 600; text-decoration: none; transition: all 0.2s; cursor: pointer; }
+        .btn-outline:hover { border-color: #FFD700; color: #FFD700; }
         
         /* MOCKUP */
-        .mockup-wrap { 
-            margin-top: 60px; 
-            max-width: 100%; 
-            margin-left: auto; 
-            margin-right: auto; 
-            position: relative;
-            padding: 0 10px;
-        }
-        .mockup-glow {
-            position: absolute;
-            inset: -40px;
-            background: radial-gradient(ellipse at center, rgba(78, 119, 255, 0.12), transparent 70%);
-            filter: blur(40px);
-            z-index: 0;
-        }
-        .mockup-frame { 
-            position: relative;
-            z-index: 1;
-            background: #111; 
-            border-radius: 16px; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            overflow: hidden; 
-            box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 20px 60px rgba(0,0,0,0.5);
-            max-width: 100%;
-        }
-        .mockup-bar { 
-            padding: 12px 16px; 
-            background: rgba(255,255,255,0.03); 
-            border-bottom: 1px solid rgba(255,255,255,0.05); 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-        }
-        .mockup-dot { width: 12px; height: 12px; border-radius: 50%; }
-        .mockup-url { 
-            flex: 1; 
-            text-align: center; 
-            font-size: 12px; 
-            color: rgba(255,255,255,0.3); 
-            background: rgba(255,255,255,0.03); 
-            padding: 4px 12px; 
-            border-radius: 6px; 
-            margin: 0 40px; 
-        }
-        .mockup-body { 
-            padding: 20px; 
-            display: flex; 
-            gap: 16px; 
-            min-height: 320px; 
-            background: linear-gradient(180deg, #0a0a0c 0%, #08080a 100%); 
-        }
-        .mockup-side { 
-            width: 180px; 
-            flex-shrink: 0; 
-            background: rgba(255,255,255,0.02); 
-            border-radius: 10px; 
-            border: 1px solid rgba(255,255,255,0.04); 
-            padding: 12px 8px; 
-        }
-        .mockup-side-logo { 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            padding: 8px 10px; 
-            margin-bottom: 16px; 
-        }
-        .mockup-side-logo-icon {
-            width: 28px;
-            height: 28px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .mockup-side-logo-icon div {
-            width: 20px;
-            height: 20px;
-            background: linear-gradient(135deg, #4e77ff, #ff77c6);
-            border-radius: 4px;
-        }
-        .mockup-side-logo span { font-size: 13px; font-weight: 600; color: white; }
-        .mockup-side-item { 
-            padding: 8px 12px; 
-            border-radius: 8px; 
-            font-size: 12px; 
-            color: rgba(255,255,255,0.4); 
-            margin-bottom: 4px; 
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .mockup-side-item.active { 
-            background: rgba(78,119,255,0.15); 
-            color: rgba(78,119,255,0.9); 
-        }
+        .mockup-wrap { margin: 60px auto 0; max-width: 100%; padding: 0 10px; }
+        .mockup-glow { position: absolute; inset: -40px; background: radial-gradient(ellipse, rgba(255,215,0,0.1), transparent 70%); filter: blur(40px); z-index: 0; }
+        .mockup-frame { position: relative; z-index: 1; background: #111; border-radius: 16px; border: 1px solid rgba(255,215,0,0.1); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+        .mockup-bar { padding: 12px 16px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 8px; }
+        .mockup-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+        .mockup-body { padding: 20px; display: flex; gap: 16px; min-height: 320px; background: #0a0a0a; }
+        .mockup-side { width: 180px; flex-shrink: 0; background: rgba(255,255,255,0.02); border-radius: 10px; border: 1px solid rgba(255,255,255,0.04); padding: 16px 10px; }
+        .mockup-side-logo { display: flex; align-items: center; gap: 8px; padding: 8px 10px; margin-bottom: 16px; }
+        .mockup-side-logo div { width: 28px; height: 28px; background: #FFD700; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .mockup-side-logo span { font-size: 13px; font-weight: 700; color: #FFD700; }
+        .mockup-side-item { padding: 8px 12px; border-radius: 8px; font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 4px; }
+        .mockup-side-item.active { background: rgba(255,215,0,0.1); color: #FFD700; }
         .mockup-main { flex: 1; min-width: 0; }
-        .mockup-stats { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 10px; 
-            margin-bottom: 14px; 
-        }
-        .mockup-stat { 
-            background: rgba(255,255,255,0.03); 
-            border: 1px solid rgba(255,255,255,0.06); 
-            border-radius: 10px; 
-            padding: 14px; 
-        }
-        .mockup-stat-label { 
-            font-size: 11px; 
-            color: rgba(255,255,255,0.4); 
-            margin-bottom: 6px; 
-        }
-        .mockup-stat-value { 
-            font-size: 20px; 
-            font-weight: 700; 
-            color: white; 
-        }
+        .mockup-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+        .mockup-stat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 14px; }
+        .mockup-stat-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
+        .mockup-stat-value { font-size: 20px; font-weight: 700; color: #fff; }
         .mockup-stat-value.green { color: #34c759; }
         .mockup-stat-value.red { color: #ff3b30; }
-        .mockup-chart { 
-            background: rgba(255,255,255,0.02); 
-            border: 1px solid rgba(255,255,255,0.04); 
-            border-radius: 10px; 
-            padding: 16px; 
-            height: 120px; 
-            display: flex; 
-            align-items: flex-end; 
-            gap: 10px; 
-            justify-content: space-around; 
-            margin-bottom: 14px; 
-        }
-        .mockup-chart-bar { 
-            flex: 1; 
-            border-radius: 4px 4px 0 0; 
-            background: linear-gradient(to top, rgba(52,199,89,0.7), rgba(52,199,89,0.3)); 
-            transition: height 0.3s;
-        }
-        .mockup-table { 
-            background: rgba(255,255,255,0.02); 
-            border: 1px solid rgba(255,255,255,0.04); 
-            border-radius: 10px; 
-            overflow: hidden; 
-        }
-        .mockup-table-head { 
-            padding: 10px 14px; 
-            background: rgba(255,255,255,0.03); 
-            border-bottom: 1px solid rgba(255,255,255,0.05); 
-            font-size: 11px; 
-            color: rgba(255,255,255,0.5); 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px;
-        }
-        .mockup-row { 
-            padding: 10px 14px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.03); 
-            font-size: 12px; 
-        }
+        .mockup-chart { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 10px; padding: 16px; height: 120px; display: flex; align-items: flex-end; gap: 10px; justify-content: space-around; margin-bottom: 14px; }
+        .mockup-chart-bar { flex: 1; border-radius: 4px 4px 0 0; background: linear-gradient(to top, rgba(255,215,0,0.6), rgba(255,215,0,0.2)); }
+        .mockup-table { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 10px; overflow: hidden; }
+        .mockup-table-head { padding: 10px 14px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .mockup-row { padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 12px; }
         .mockup-row:last-child { border-bottom: none; }
-        .mockup-row span { color: rgba(255,255,255,0.6); }
         .mockup-row .date { color: rgba(255,255,255,0.4); font-size: 11px; }
         .mockup-row .name { color: rgba(255,255,255,0.8); font-weight: 500; }
         .mockup-row .neg { color: #ff6b6b; font-weight: 600; }
         .mockup-row .pos { color: #51cf66; font-weight: 600; }
-        .mockup-row .badge {
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 100px;
-        }
+        .mockup-row .badge { font-size: 10px; padding: 2px 8px; border-radius: 100px; }
         .mockup-row .badge-expense { background: rgba(255,59,48,0.15); color: #ff6b6b; }
         .mockup-row .badge-income { background: rgba(52,199,89,0.15); color: #51cf66; }
         
         /* SECTIONS */
-        section { padding: 80px 0; }
-        .section-head { text-align: center; margin-bottom: 48px; }
-        .section-head h2 { font-size: 40px; font-weight: 800; letter-spacing: -1px; margin-bottom: 12px; color: white; }
-        .section-head p { font-size: 16px; color: rgba(255,255,255,0.4); max-width: 500px; margin: 0 auto; }
+        section { padding: 100px 0; }
+        .section-head { text-align: center; margin-bottom: 56px; }
+        .section-head h2 { font-size: 40px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 12px; }
+        .section-head p { font-size: 16px; max-width: 500px; margin: 0 auto; }
         
         /* FEATURES */
-        .features { background: #050507; }
-        .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(255,255,255,0.04); border-radius: 12px; overflow: hidden; }
-        .feat-card { background: #0a0a0c; padding: 28px 24px; }
-        .feat-icon { font-size: 28px; margin-bottom: 14px; }
-        .feat-card h3 { font-size: 16px; font-weight: 600; color: white; margin-bottom: 6px; }
-        .feat-card p { font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.5; }
+        .features { background: #fff; }
+        .features .section-head h2 { color: #000; }
+        .features .section-head p { color: #666; }
+        .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #e5e5e5; border-radius: 16px; overflow: hidden; }
+        .feat-card { background: #fff; padding: 32px 24px; transition: all 0.2s; }
+        .feat-card:hover { background: #fafafa; }
+        .feat-icon { font-size: 28px; margin-bottom: 16px; }
+        .feat-card h3 { font-size: 16px; font-weight: 700; color: #000; margin-bottom: 6px; }
+        .feat-card p { font-size: 14px; color: #666; line-height: 1.5; }
         
         /* STEPS */
-        .steps { background: #08080a; }
-        .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+        .steps { background: #f5f5f5; }
+        .steps .section-head h2 { color: #000; }
+        .steps .section-head p { color: #666; }
+        .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
         .step { text-align: center; }
-        .step-num { width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
-        .step h3 { font-size: 18px; font-weight: 600; color: white; margin-bottom: 6px; }
-        .step p { font-size: 14px; color: rgba(255,255,255,0.4); }
+        .step-num { width: 72px; height: 72px; margin: 0 auto 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 800; background: #000; color: #FFD700; border: 3px solid #FFD700; }
+        .step h3 { font-size: 18px; font-weight: 700; color: #000; margin-bottom: 8px; }
+        .step p { font-size: 14px; color: #666; }
         
         /* PRICING */
         .pricing { background: #fff; }
-        .pricing .section-head h2 { color: #1d1d1f; }
-        .pricing .section-head p { color: #6e6e73; }
-        .price-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .price-card { background: #f5f5f7; border: 1px solid #e5e5ea; border-radius: 12px; padding: 24px; }
-        .price-card.popular { background: #1d1d1f; border-color: #1d1d1f; position: relative; }
-        .price-card.popular::before { content: 'Popular'; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #1d1d1f; color: white; padding: 2px 12px; border-radius: 100px; font-size: 11px; font-weight: 600; }
-        .price-card h3 { font-size: 16px; font-weight: 600; color: #1d1d1f; margin-bottom: 8px; }
-        .price-card.popular h3 { color: #fff; }
-        .price-amount { font-size: 40px; font-weight: 800; color: #1d1d1f; margin: 12px 0; letter-spacing: -2px; }
+        .pricing .section-head h2 { color: #000; }
+        .pricing .section-head p { color: #666; }
+        .price-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .price-card { background: #f9f9f9; border: 1px solid #e5e5e5; border-radius: 16px; padding: 28px; transition: all 0.2s; }
+        .price-card:hover { border-color: #FFD700; transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
+        .price-card.popular { background: #000; border-color: #FFD700; position: relative; }
+        .price-card.popular::before { content: 'Popular'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #FFD700; color: #000; padding: 3px 16px; border-radius: 100px; font-size: 12px; font-weight: 700; }
+        .price-card h3 { font-size: 16px; font-weight: 700; color: #000; margin-bottom: 8px; }
+        .price-card.popular h3 { color: #FFD700; }
+        .price-amount { font-size: 44px; font-weight: 900; color: #000; margin: 12px 0; letter-spacing: -2px; }
         .price-card.popular .price-amount { color: #fff; }
-        .price-amount span { font-size: 14px; font-weight: 400; color: #86868b; letter-spacing: 0; }
+        .price-amount span { font-size: 14px; font-weight: 400; color: #999; letter-spacing: 0; }
         .price-card.popular .price-amount span { color: rgba(255,255,255,0.4); }
-        .price-list { list-style: none; margin: 16px 0; }
-        .price-list li { padding: 6px 0; font-size: 13px; color: #6e6e73; }
+        .price-list { list-style: none; margin: 20px 0; }
+        .price-list li { padding: 7px 0; font-size: 13px; color: #555; }
         .price-card.popular .price-list li { color: rgba(255,255,255,0.6); }
-        .price-list li::before { content: '✓ '; color: #34c759; font-weight: 700; }
-        .btn-price { display: block; width: 100%; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: center; text-decoration: none; border: 1px solid #d2d2d7; color: #1d1d1f; background: transparent; }
-        .btn-price:hover { background: #e8e8ed; }
-        .btn-price.fill { background: white; color: #000; border: none; }
+        .price-list li::before { content: '✓ '; color: #FFD700; font-weight: 800; }
+        .btn-price { display: block; width: 100%; padding: 11px; border-radius: 10px; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; border: 1px solid #ddd; color: #000; background: #fff; transition: all 0.2s; cursor: pointer; }
+        .btn-price:hover { background: #000; color: #FFD700; border-color: #000; }
+        .btn-price.fill { background: #FFD700; color: #000; border-color: #FFD700; }
+        .btn-price.fill:hover { background: #e6c200; }
         
         /* CTA */
-        .cta { padding: 100px 0; text-align: center; position: relative; }
-        .cta-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, rgba(78,119,255,0.08), transparent); }
-        .cta h2 { font-size: 40px; font-weight: 800; letter-spacing: -1px; color: white; margin-bottom: 12px; position: relative; }
-        .cta p { font-size: 16px; color: rgba(255,255,255,0.4); margin-bottom: 32px; position: relative; }
+        .cta { padding: 100px 0; text-align: center; background: #000; }
+        .cta h2 { font-size: 40px; font-weight: 800; letter-spacing: -1px; color: #FFD700; margin-bottom: 12px; }
+        .cta p { font-size: 16px; color: rgba(255,255,255,0.5); margin-bottom: 32px; }
         
         /* FOOTER */
-        footer { padding: 32px 0; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; }
-        footer p { color: rgba(255,255,255,0.3); font-size: 12px; }
-        footer a { color: rgba(255,255,255,0.5); text-decoration: none; }
+        footer { padding: 32px 0; background: #111; border-top: 1px solid rgba(255,215,0,0.1); }
+        footer p { color: rgba(255,255,255,0.4); font-size: 12px; text-align: center; }
+        footer a { color: #FFD700; text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
         
         /* RESPONSIVE */
         @media (max-width: 1024px) {
@@ -318,15 +150,14 @@
         }
         @media (max-width: 768px) {
             .nav-links a:not(.nav-cta):not(.lang-btn) { display: none; }
-            .hero { padding: 80px 0 40px; }
-            .hero h1 { font-size: 32px; letter-spacing: -1px; }
-            .hero-title-brand { font-size: 42px !important; }
-            .hero p { font-size: 15px; margin-bottom: 28px; }
-            .hero-buttons { flex-direction: column; align-items: center; }
-            .btn-primary, .btn-secondary { width: 100%; max-width: 280px; justify-content: center; }
+            .hero-title { font-size: 40px; letter-spacing: -2px; }
+            .hero-subtitle { font-size: 18px; }
+            .hero-desc { font-size: 15px; }
+            .hero-btns { flex-direction: column; align-items: center; }
+            .btn-gold, .btn-outline { width: 100%; max-width: 280px; justify-content: center; }
             .section-head h2 { font-size: 28px; }
             .feat-grid { grid-template-columns: 1fr; }
-            .steps-grid { grid-template-columns: 1fr; gap: 24px; }
+            .steps-grid { grid-template-columns: 1fr; gap: 32px; }
             .price-grid { grid-template-columns: 1fr; max-width: 320px; margin: 0 auto; }
             .cta h2 { font-size: 28px; }
             .mockup-side { display: none; }
@@ -334,27 +165,17 @@
             .mockup-body { padding: 14px; }
             .mockup-stat { padding: 10px; }
             .mockup-stat-value { font-size: 16px; }
-            .mockup-chart { height: 80px; padding: 10px; }
+            .mockup-chart { height: 80px; }
             .mockup-row { padding: 8px 12px; font-size: 11px; }
-            .mockup-row .badge { font-size: 9px; padding: 2px 6px; }
             section { padding: 60px 0; }
             .container { padding: 0 16px; }
         }
         @media (max-width: 480px) {
-            .hero h1 { font-size: 26px; }
-            .hero-title-brand { font-size: 34px !important; }
-            .hero p { font-size: 14px; }
-            .price-amount { font-size: 32px; }
+            .hero-title { font-size: 32px; }
+            .hero-subtitle { font-size: 16px; }
+            .price-amount { font-size: 36px; }
             .section-head h2 { font-size: 24px; }
-            .step-num { width: 52px; height: 52px; font-size: 20px; }
-            .mockup-body { padding: 10px; }
-            .mockup-stats { grid-template-columns: 1fr 1fr; gap: 6px; }
-            .mockup-stat { padding: 8px; }
-            .mockup-stat-value { font-size: 14px; }
-            .mockup-stat-label { font-size: 9px; }
-            .mockup-chart { height: 60px; padding: 8px; gap: 6px; }
-            .mockup-row { padding: 6px 8px; font-size: 10px; }
-            .mockup-row .name { max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            .step-num { width: 56px; height: 56px; font-size: 22px; }
         }
     </style>
 </head>
@@ -364,8 +185,10 @@
         const T = {
             es: {
                 'nav.features': 'Funciones', 'nav.how': 'Cómo funciona', 'nav.pricing': 'Precios', 'nav.cta': 'Empezar gratis',
-                'hero.badge': 'Disponible ahora — Empieza gratis', 'hero.title': 'Deja que tus facturas se organicen solas',
-                'hero.sub': 'Sube una foto de tu factura y BillsnApp extrae los datos, los clasifica y los contabiliza automáticamente.',
+                'hero.badge': 'Disponible ahora — Empieza gratis',
+                'hero.title': 'BillsnApp',
+                'hero.subtitle': 'Deja que tus facturas se organicen solas',
+                'hero.desc': 'Sube una foto de tu factura y extraemos los datos, los clasificamos y los contabilizamos automáticamente.',
                 'hero.btn1': 'Empezar gratis', 'hero.btn2': 'Ver cómo funciona',
                 'f.title': 'Todo lo que necesitas', 'f.sub': 'Solo sube tus facturas y el sistema hace el resto.',
                 'f.1': 'Sube fotos', 'f.1d': 'Foto o PDF. El sistema lee los datos automáticamente.',
@@ -386,8 +209,10 @@
             },
             en: {
                 'nav.features': 'Features', 'nav.how': 'How it works', 'nav.pricing': 'Pricing', 'nav.cta': 'Start free',
-                'hero.badge': 'Available now — Start free', 'hero.title': 'Let your invoices organize themselves',
-                'hero.sub': 'Upload a photo and BillsnApp extracts, classifies, and accounts for it automatically.',
+                'hero.badge': 'Available now — Start free',
+                'hero.title': 'BillsnApp',
+                'hero.subtitle': 'Let your invoices organize themselves',
+                'hero.desc': 'Upload a photo of your invoice and we extract, classify, and account for it automatically.',
                 'hero.btn1': 'Start free', 'hero.btn2': 'See how it works',
                 'f.title': 'Everything you need', 'f.sub': 'Just upload your invoices and the system does the rest.',
                 'f.1': 'Upload photos', 'f.1d': 'Photo or PDF. System reads data automatically.',
@@ -431,19 +256,16 @@
 
     <!-- HERO -->
     <section class="hero">
-        <div class="hero-bg"></div>
-        <div class="hero-grid"></div>
+        <div class="hero-glow"></div>
         <div class="container">
             <div class="hero-content">
-                <div style="display: inline-block; padding: 10px 24px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 100px; font-size: 14px; color: white; margin-bottom: 28px; white-space: nowrap;">
-                    <span style="display: inline-block; width: 8px; height: 8px; background: #34c759; border-radius: 50%; margin-right: 8px; vertical-align: middle; box-shadow: 0 0 8px rgba(52,199,89,0.5);"></span>
-                    <span data-t="hero.badge">Disponible ahora — Empieza gratis</span>
-                </div>
-                <h1><span class="hero-title-brand">BillsnApp</span><span data-t="hero.title">Deja que tus facturas se organicen solas</span></h1>
-                <p data-t="hero.sub">Sube una foto de tu factura y BillsnApp extrae los datos, los clasifica y los contabiliza automáticamente.</p>
-                <div class="hero-buttons">
-                    <a href="/app" class="btn-primary"><span data-t="hero.btn1">Empezar gratis</span> <span style="font-size: 18px; margin-left: 4px;">→</span></a>
-                    <a href="#how" class="btn-secondary" data-t="hero.btn2">Ver cómo funciona</a>
+                <div class="hero-badge"><span class="hero-badge-dot"></span><span data-t="hero.badge">Disponible ahora — Empieza gratis</span></div>
+                <h1 class="hero-title" data-t="hero.title">BillsnApp</h1>
+                <p class="hero-subtitle" data-t="hero.subtitle">Deja que tus facturas se organicen solas</p>
+                <p class="hero-desc" data-t="hero.desc">Sube una foto de tu factura y extraemos los datos, los clasificamos y los contabilizamos automáticamente.</p>
+                <div class="hero-btns">
+                    <a href="/app" class="btn-gold"><span data-t="hero.btn1">Empezar gratis</span> <span style="font-size: 18px;">→</span></a>
+                    <a href="#how" class="btn-outline" data-t="hero.btn2">Ver cómo funciona</a>
                 </div>
 
                 <!-- MOCKUP -->
@@ -451,16 +273,13 @@
                     <div class="mockup-glow"></div>
                     <div class="mockup-frame">
                         <div class="mockup-bar">
-                            <div style="width: 14px; height: 14px; border-radius: 50%; background: #ff5f57; flex-shrink: 0;"></div>
-                            <div style="width: 14px; height: 14px; border-radius: 50%; background: #febc2e; flex-shrink: 0;"></div>
-                            <div style="width: 14px; height: 14px; border-radius: 50%; background: #28c840; flex-shrink: 0;"></div>
+                            <div class="mockup-dot" style="background:#ff5f57"></div>
+                            <div class="mockup-dot" style="background:#febc2e"></div>
+                            <div class="mockup-dot" style="background:#28c840"></div>
                         </div>
                         <div class="mockup-body">
                             <div class="mockup-side">
-                                <div class="mockup-side-logo">
-                                    <div class="mockup-side-logo-icon"><div></div></div>
-                                    <span>BillsnApp</span>
-                                </div>
+                                <div class="mockup-side-logo"><div>📊</div><span>BillsnApp</span></div>
                                 <div class="mockup-side-item active">📊 Dashboard</div>
                                 <div class="mockup-side-item">📤 Subir Facturas</div>
                                 <div class="mockup-side-item">📋 Facturas</div>
@@ -469,22 +288,10 @@
                             </div>
                             <div class="mockup-main">
                                 <div class="mockup-stats">
-                                    <div class="mockup-stat">
-                                        <div class="mockup-stat-label">Total Facturas</div>
-                                        <div class="mockup-stat-value">127</div>
-                                    </div>
-                                    <div class="mockup-stat">
-                                        <div class="mockup-stat-label">Ingresos</div>
-                                        <div class="mockup-stat-value green">+12,450€</div>
-                                    </div>
-                                    <div class="mockup-stat">
-                                        <div class="mockup-stat-label">Gastos</div>
-                                        <div class="mockup-stat-value red">-4,250€</div>
-                                    </div>
-                                    <div class="mockup-stat">
-                                        <div class="mockup-stat-label">Beneficio</div>
-                                        <div class="mockup-stat-value green">+8,200€</div>
-                                    </div>
+                                    <div class="mockup-stat"><div class="mockup-stat-label">Facturas</div><div class="mockup-stat-value">127</div></div>
+                                    <div class="mockup-stat"><div class="mockup-stat-label">Ingresos</div><div class="mockup-stat-value green">+12,450€</div></div>
+                                    <div class="mockup-stat"><div class="mockup-stat-label">Gastos</div><div class="mockup-stat-value red">-4,250€</div></div>
+                                    <div class="mockup-stat"><div class="mockup-stat-label">Beneficio</div><div class="mockup-stat-value green">+8,200€</div></div>
                                 </div>
                                 <div class="mockup-chart">
                                     <div class="mockup-chart-bar" style="height:35%"></div>
@@ -496,30 +303,10 @@
                                 </div>
                                 <div class="mockup-table">
                                     <div class="mockup-table-head">ÚLTIMAS FACTURAS</div>
-                                    <div class="mockup-row">
-                                        <span class="date">15/03/2026</span>
-                                        <span class="name">Iberdrola</span>
-                                        <span class="badge badge-expense">Gasto</span>
-                                        <span class="neg">-145,20€</span>
-                                    </div>
-                                    <div class="mockup-row">
-                                        <span class="date">12/03/2026</span>
-                                        <span class="name">Cliente Juan López</span>
-                                        <span class="badge badge-income">Ingreso</span>
-                                        <span class="pos">+1,200,00€</span>
-                                    </div>
-                                    <div class="mockup-row">
-                                        <span class="date">10/03/2026</span>
-                                        <span class="name">Movistar</span>
-                                        <span class="badge badge-expense">Gasto</span>
-                                        <span class="neg">-45,00€</span>
-                                    </div>
-                                    <div class="mockup-row">
-                                        <span class="date">08/03/2026</span>
-                                        <span class="name">Cliente María García</span>
-                                        <span class="badge badge-income">Ingreso</span>
-                                        <span class="pos">+2,500,00€</span>
-                                    </div>
+                                    <div class="mockup-row"><span class="date">15/03/2026</span><span class="name">Iberdrola</span><span class="badge badge-expense">Gasto</span><span class="neg">-145,20€</span></div>
+                                    <div class="mockup-row"><span class="date">12/03/2026</span><span class="name">Cliente Juan López</span><span class="badge badge-income">Ingreso</span><span class="pos">+1,200€</span></div>
+                                    <div class="mockup-row"><span class="date">10/03/2026</span><span class="name">Movistar</span><span class="badge badge-expense">Gasto</span><span class="neg">-45,00€</span></div>
+                                    <div class="mockup-row"><span class="date">08/03/2026</span><span class="name">Cliente María García</span><span class="badge badge-income">Ingreso</span><span class="pos">+2,500€</span></div>
                                 </div>
                             </div>
                         </div>
@@ -564,25 +351,25 @@
                 <div class="price-card">
                     <h3 data-t="p.free">Free</h3>
                     <div class="price-amount">0€ <span data-t="p.month">/mes</span></div>
-                    <ul class="price-list"><li>25 facturas/mes</li><li>OCR básico</li><li>Tabla organizada</li><li>Exportar CSV</li></ul>
+                    <ul class="price-list"><li>20 facturas/mes</li><li>OCR básico</li><li>Tabla organizada</li><li>Exportar CSV</li></ul>
                     <a href="/app" class="btn-price" data-t="p.free.cta">Empezar gratis</a>
                 </div>
                 <div class="price-card popular">
                     <h3 data-t="p.auto">Autónomo</h3>
                     <div class="price-amount">9€ <span data-t="p.month">/mes</span></div>
-                    <ul class="price-list"><li>200 facturas/mes</li><li>Procesamiento automático</li><li>Informes PDF</li><li>Categorías ilimitadas</li><li>Dashboard completo</li></ul>
+                    <ul class="price-list"><li>100 facturas/mes</li><li>IA nativa incluida</li><li>Informes PDF</li><li>Categorías ilimitadas</li></ul>
                     <a href="/app" class="btn-price fill" data-t="p.cta">Elegir plan</a>
                 </div>
                 <div class="price-card">
                     <h3 data-t="p.pyme">PYME</h3>
                     <div class="price-amount">19€ <span data-t="p.month">/mes</span></div>
-                    <ul class="price-list"><li>1,000 facturas/mes</li><li>Motor avanzado</li><li>3 usuarios</li><li>Multi-empresa</li><li>Soporte prioritario</li></ul>
+                    <ul class="price-list"><li>500 facturas/mes</li><li>3 usuarios</li><li>Multi-empresa</li><li>Soporte prioritario</li></ul>
                     <a href="/app" class="btn-price" data-t="p.cta">Elegir plan</a>
                 </div>
                 <div class="price-card">
                     <h3 data-t="p.gest">Gestoría</h3>
                     <div class="price-amount">49€ <span data-t="p.month">/mes</span></div>
-                    <ul class="price-list"><li>5,000 facturas/mes</li><li>10 usuarios</li><li>20 empresas</li><li>Motor externo</li><li>Soporte dedicado</li></ul>
+                    <ul class="price-list"><li>5,000 facturas/mes</li><li>10 usuarios</li><li>Multi-empresa</li><li>Soporte dedicado</li></ul>
                     <a href="/app" class="btn-price" data-t="p.cta">Elegir plan</a>
                 </div>
             </div>
@@ -591,11 +378,10 @@
 
     <!-- CTA -->
     <section class="cta">
-        <div class="cta-bg"></div>
         <div class="container">
             <h2 data-t="c.title">¿Listo para simplificar tu contabilidad?</h2>
             <p data-t="c.sub">Empieza gratis hoy. Sin tarjeta.</p>
-            <a href="/app" class="btn-primary" style="position:relative"><span data-t="c.btn">Empezar ahora</span> <span style="font-size: 18px; margin-left: 4px;">→</span></a>
+            <a href="/app" class="btn-gold"><span data-t="c.btn">Empezar ahora</span> <span style="font-size: 18px;">→</span></a>
         </div>
     </section>
 

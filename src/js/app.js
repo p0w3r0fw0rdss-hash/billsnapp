@@ -19,46 +19,59 @@ const app = {
      */
     async init() {
         try {
+            console.log('🚀 BillsnApp initializing...');
+            
             // Initialize i18n
             await i18n.init();
+            console.log('✅ i18n initialized');
 
             // Initialize database
             await DB.init();
+            console.log('✅ Database initialized');
 
             // Load theme preference
             this.darkMode = localStorage.getItem('billsnap_dark') === 'true';
             this.applyTheme();
 
-            // Initialize authentication
-            const currentUser = await Auth.init();
+            // Initialize Supabase Auth
+            let currentUser = null;
+            try {
+                currentUser = await SupabaseAuth.init();
+                console.log('✅ Supabase Auth initialized');
+            } catch (authError) {
+                console.warn('⚠️ Supabase Auth failed, using local auth:', authError);
+                // Fall back to local auth
+                currentUser = await Auth.init();
+                console.log('✅ Local Auth initialized');
+            }
 
             // Check if user is logged in
-            if (!Auth.isLoggedIn()) {
+            const isLoggedIn = SupabaseAuth.isLoggedIn() || Auth.isLoggedIn();
+            
+            if (!isLoggedIn) {
+                console.log('👤 No user logged in, showing login screen');
                 this.renderLoginScreen();
                 return;
             }
 
+            const user = SupabaseAuth.getUser() || Auth.getCurrentUser();
+            console.log('👤 User logged in:', user?.email || user?.name);
+
             // Initialize billing
             await Billing.init();
+            console.log('✅ Billing initialized');
 
             // Initialize companies
             await Companies.init();
-
-            // Initialize email
-            await Email.loadConfig();
+            console.log('✅ Companies initialized');
 
             // Initialize accounting
             await Accounting.init();
-
-            // Detect available AI engines
-            await this.detectAIEngines();
-
-            // Load configurations
-            await AIAPI.loadConfig();
-            await GoogleSheets.loadConfig();
+            console.log('✅ Accounting initialized');
 
             // Render main app
             this.renderApp();
+            console.log('✅ App rendered');
 
             // Load data
             const count = await DB.getInvoiceCount();
@@ -67,12 +80,22 @@ const app = {
                 await this.loadInvoices();
             }
 
-            // Show AI status
-            const aiStatus = this.getAIStatusText();
-            this.showToast(`${i18n.t('auth.welcome', { name: currentUser.name })} · ${aiStatus}`, 'success');
+            this.showToast(`Welcome, ${user?.name || user?.email || 'User'}!`, 'success');
+            
         } catch (error) {
-            console.error('Error initializing app:', error);
-            this.showToast('Error initializing application', 'error');
+            console.error('❌ Error initializing app:', error);
+            // Show error and login screen
+            document.getElementById('app').innerHTML = `
+                <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f5f5f7;">
+                    <div style="text-align: center; padding: 40px; max-width: 400px;">
+                        <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 16px; color: #1d1d1f;">Error de inicialización</h1>
+                        <p style="color: #6e6e73; margin-bottom: 24px;">${error.message}</p>
+                        <button onclick="location.reload()" style="padding: 12px 24px; background: #000; color: #FFD700; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                            Reintentar
+                        </button>
+                    </div>
+                </div>
+            `;
         }
     },
 
@@ -217,15 +240,27 @@ const app = {
      */
     async handleLogin(event) {
         event.preventDefault();
-        const username = document.getElementById('login-username').value;
+        const email = document.getElementById('login-username').value;
         const password = document.getElementById('login-password').value;
         const errorEl = document.getElementById('login-error');
 
         try {
-            await Auth.login(username, password);
+            errorEl.classList.add('hidden');
+            
+            // Try Supabase auth first
+            try {
+                await SupabaseAuth.signIn(email, password);
+                window.location.reload();
+                return;
+            } catch (e) {
+                console.log('Supabase login failed, trying local:', e.message);
+            }
+            
+            // Fall back to local auth
+            await Auth.login(email, password);
             window.location.reload();
         } catch (error) {
-            errorEl.textContent = i18n.t('auth.invalid');
+            errorEl.textContent = error.message || 'Invalid credentials';
             errorEl.classList.remove('hidden');
         }
     },
@@ -234,7 +269,7 @@ const app = {
      * Render main application
      */
     renderApp() {
-        const user = Auth.getCurrentUser();
+        const user = SupabaseAuth.getUser() || Auth.getCurrentUser() || { name: 'User', email: 'user@example.com' };
         const appEl = document.getElementById('app');
         
         appEl.innerHTML = `
@@ -1838,7 +1873,12 @@ const app = {
      */
     async handleLogout() {
         if (confirm(i18n.t('auth.logout') + '?')) {
-            await Auth.logout();
+            try {
+                await SupabaseAuth.signOut();
+            } catch (e) {}
+            try {
+                await Auth.logout();
+            } catch (e) {}
             window.location.reload();
         }
     },

@@ -386,7 +386,7 @@ const app = {
     /**
      * Show a section
      */
-    showSection(sectionId) {
+    async showSection(sectionId) {
         if (!Auth.hasPermission('view') && sectionId !== 'settings') {
             this.showToast(i18n.t('msg.no_permission'), 'error');
             return;
@@ -410,8 +410,7 @@ const app = {
             case 'dashboard':
                 this.renderDashboard(contentArea);
                 break;
-            case 'upload':
-                await this.renderUpload(contentArea);
+            this.renderUpload(contentArea);
                 break;
             case 'invoices':
                 this.renderInvoices(contentArea);
@@ -423,7 +422,7 @@ const app = {
                 contentArea.innerHTML = Billing.renderPricingPage(i18n.getLang());
                 break;
             case 'settings':
-                await this.renderSettings(contentArea);
+                this.renderSettings(contentArea);
                 break;
         }
     },

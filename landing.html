@@ -103,7 +103,7 @@
             transition: all 0.2s;
             border: none;
             background: transparent;
-            color: rgba(255,255,255,0.5);
+            color: var(--gold);
             font-family: inherit;
         }
         .version-btn.active {
@@ -488,7 +488,7 @@
         .pricing { background: var(--white); }
         .pricing .section-head h2 { color: var(--gray-900); }
         .pricing .section-head p { color: var(--gray-500); }
-        .price-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: start; }
+        .price-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; align-items: start; max-width: 100%; }
         .price-card {
             background: var(--gray-50);
             border: 1px solid var(--gray-200);
@@ -618,7 +618,7 @@
            ============================================ */
         @media (max-width: 1024px) {
             .feat-grid { grid-template-columns: repeat(2, 1fr); }
-            .price-grid { grid-template-columns: repeat(2, 1fr); }
+            .price-grid { grid-template-columns: repeat(3, 1fr); }
             .price-card.popular { transform: none; }
             .price-card.popular:hover { transform: translateY(-6px); }
         }
@@ -906,6 +906,17 @@
                             <li>IA nativa incluida</li>
                             <li>Informes PDF</li>
                             <li>Contabilidad automática</li>
+                            <li>1 usuario, 1 empresa</li>
+                        </ul>
+                        <a href="/app" class="btn-price">Elegir plan</a>
+                    </div>
+                    <div class="price-card">
+                        <h3>Basic</h3>
+                        <div class="price-val">15€ <span>/mes</span></div>
+                        <ul class="price-list">
+                            <li>300 facturas/mes</li>
+                            <li>IA nativa incluida</li>
+                            <li>Todos los informes</li>
                             <li>1 usuario, 1 empresa</li>
                         </ul>
                         <a href="/app" class="btn-price">Elegir plan</a>

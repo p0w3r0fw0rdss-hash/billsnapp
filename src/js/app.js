@@ -208,27 +208,27 @@ const app = {
                     <p class="login-subtitle">${i18n.t('app.tagline')}</p>
                     
                     <form id="login-form" onsubmit="app.handleLogin(event)">
-                        <div class="form-group">
-                            <label class="form-label">${i18n.t('auth.username')}</label>
-                            <input type="text" id="login-username" class="form-input" placeholder="${i18n.t('auth.username')}" required autofocus>
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6); margin-bottom: 6px;">${i18n.t('auth.username')}</label>
+                            <input type="text" id="login-username" style="width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 14px; color: #fff; font-family: inherit; transition: all 0.2s;" placeholder="admin" required autofocus>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">${i18n.t('auth.password')}</label>
-                            <input type="password" id="login-password" class="form-input" placeholder="${i18n.t('auth.password')}" required>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6); margin-bottom: 6px;">${i18n.t('auth.password')}</label>
+                            <input type="password" id="login-password" style="width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 14px; color: #fff; font-family: inherit; transition: all 0.2s;" placeholder="••••••••" required>
                         </div>
-                        <div id="login-error" class="hidden" style="color: var(--accent-red); font-size: 13px; margin-bottom: 16px; text-align: center;"></div>
-                        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+                        <div id="login-error" class="hidden" style="color: #ff453a; font-size: 13px; margin-bottom: 16px; text-align: center;"></div>
+                        <button type="submit" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; box-shadow: 0 4px 15px rgba(255,215,0,0.3); transition: all 0.2s;">
                             ${i18n.t('auth.login')}
                         </button>
                     </form>
                     
-                    <p style="text-align: center; font-size: 13px; color: var(--text-tertiary); margin-top: 24px;">
+                    <p style="text-align: center; font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 24px;">
                         ${i18n.t('auth.default')}
                     </p>
                     
                     <div style="display: flex; justify-content: center; gap: 8px; margin-top: 16px;">
-                        <button onclick="app.switchLang('es')" class="lang-selector">🇪🇸 Español</button>
-                        <button onclick="app.switchLang('en')" class="lang-selector">🇬🇧 English</button>
+                        <button onclick="app.switchLang('es')" style="padding: 6px 12px; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.15); border-radius: 6px; cursor: pointer; color: #FFD700; font-size: 12px; font-weight: 500;">🇪🇸 Español</button>
+                        <button onclick="app.switchLang('en')" style="padding: 6px 12px; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.15); border-radius: 6px; cursor: pointer; color: #FFD700; font-size: 12px; font-weight: 500;">🇬🇧 English</button>
                     </div>
                 </div>
             </div>

@@ -17,6 +17,7 @@
     "author": "",
     "license": "MIT",
     "dependencies": {
-        "@supabase/supabase-js": "^2.109.0"
+        "@supabase/supabase-js": "^2.109.0",
+        "ws": "^8.21.3"
     }
 }

@@ -15,5 +15,8 @@
         "PDF"
     ],
     "author": "",
-    "license": "MIT"
+    "license": "MIT",
+    "dependencies": {
+        "@supabase/supabase-js": "^2.109.0"
+    }
 }

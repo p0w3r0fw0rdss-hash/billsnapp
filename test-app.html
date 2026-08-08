@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BillsnApp - Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #000; color: #FFD700; padding: 40px; }
+        .ok { color: #34c759; }
+        .err { color: #ff3b30; }
+        .warn { color: #ff9500; }
+        h1 { margin-bottom: 20px; }
+        .log { background: #111; padding: 16px; border-radius: 8px; margin: 16px 0; font-family: monospace; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 BillsnApp - Diagnóstico</h1>
+    <div id="log" class="log">Iniciando...</div>
+    
+    <script>
+        const log = document.getElementById('log');
+        function addLog(msg, type = 'ok') {
+            const p = document.createElement('p');
+            p.className = type;
+            p.textContent = msg;
+            log.appendChild(p);
+        }
+        
+        addLog('✅ HTML cargado correctamente');
+        
+        // Test 1: Config
+        try {
+            addLog('⏳ Cargando config.js...');
+        } catch(e) {
+            addLog('❌ Error en config.js: ' + e.message, 'err');
+        }
+    </script>
+    <script src="src/js/config.js" onerror="addLog('❌ Error cargando config.js', 'err')"></script>
+    <script>
+        try {
+            if(typeof CONFIG !== 'undefined') {
+                addLog('✅ config.js cargado - Supabase: ' + CONFIG.supabase.url);
+            } else {
+                addLog('❌ config.js no definió CONFIG', 'err');
+            }
+        } catch(e) {
+            addLog('❌ Error: ' + e.message, 'err');
+        }
+    </script>
+    
+    <script src="src/js/i18n/i18n.js" onerror="addLog('❌ Error cargando i18n.js', 'err')"></script>
+    <script>
+        try {
+            if(typeof i18n !== 'undefined') {
+                addLog('✅ i18n.js cargado');
+            }
+        } catch(e) { addLog('❌ Error: ' + e.message, 'err'); }
+    </script>
+    
+    <script src="src/js/utils/helpers.js" onerror="addLog('❌ Error cargando helpers.js', 'err')"></script>
+    <script>
+        try {
+            if(typeof Helpers !== 'undefined') {
+                addLog('✅ helpers.js cargado');
+            }
+        } catch(e) { addLog('❌ Error: ' + e.message, 'err'); }
+    </script>
+    
+    <script src="src/js/storage/indexeddb.js" onerror="addLog('❌ Error cargando indexeddb.js', 'err')"></script>
+    <script>
+        try {
+            if(typeof DB !== 'undefined') {
+                addLog('✅ indexeddb.js cargado');
+            }
+        } catch(e) { addLog('❌ Error: ' + e.message, 'err'); }
+    </script>
+    
+    <script src="src/js/ocr/tesseract-ocr.js" onerror="addLog('❌ Error cargando tesseract-ocr.js', 'err')"></script>
+    <script src="src/js/ocr/ai-api.js" onerror="addLog('❌ Error cargando ai-api.js', 'err')"></script>
+    <script src="src/js/ai/native-ai.js" onerror="addLog('❌ Error cargando native-ai.js', 'err')"></script>
+    <script src="src/js/ai/vision-ai.js" onerror="addLog('❌ Error cargando vision-ai.js', 'err')"></script>
+    <script src="src/js/ai/webllm-ai.js" onerror="addLog('❌ Error cargando webllm-ai.js', 'err')"></script>
+    <script src="src/js/accounting/accounting.js" onerror="addLog('❌ Error cargando accounting.js', 'err')"></script>
+    <script src="src/js/company/companies.js" onerror="addLog('❌ Error cargando companies.js', 'err')"></script>
+    <script src="src/js/email/email.js" onerror="addLog('❌ Error cargando email.js', 'err')"></script>
+    <script src="src/js/billing/plans.js" onerror="addLog('❌ Error cargando plans.js', 'err')"></script>
+    <script src="src/js/billing/stripe.js" onerror="addLog('❌ Error cargando stripe.js', 'err')"></script>
+    <script src="src/js/verifactu/verifactu.js" onerror="addLog('❌ Error cargando verifactu.js', 'err')"></script>
+    <script src="src/js/pdf/generator.js" onerror="addLog('❌ Error cargando generator.js', 'err')"></script>
+    <script src="src/js/auth/auth.js" onerror="addLog('❌ Error cargando auth.js', 'err')"></script>
+    <script src="src/js/auth/supabase-auth.js" onerror="addLog('❌ Error cargando supabase-auth.js', 'err')"></script>
+    
+    <script>
+        addLog('⏳ Cargando app.js...');
+    </script>
+    <script src="src/js/app.js" onerror="addLog('❌ Error cargando app.js', 'err')"></script>
+    
+    <script>
+        try {
+            if(typeof app !== 'undefined') {
+                addLog('✅ app.js cargado correctamente');
+                addLog('⏳ Iniciando app...');
+                app.init().then(() => {
+                    addLog('✅ App iniciada correctamente');
+                }).catch(err => {
+                    addLog('❌ Error al iniciar app: ' + err.message, 'err');
+                });
+            } else {
+                addLog('❌ app.js no definió la variable app', 'err');
+            }
+        } catch(e) {
+            addLog('❌ Error: ' + e.message, 'err');
+        }
+    </script>
+</body>
+</html>

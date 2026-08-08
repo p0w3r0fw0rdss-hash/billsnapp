@@ -33,20 +33,32 @@ const app = {
             this.darkMode = localStorage.getItem('billsnap_dark') === 'true';
             this.applyTheme();
 
-            // Initialize Supabase Auth
+            // Initialize Auth (try Supabase first, fallback to local)
             let currentUser = null;
+            let authMethod = 'local';
+            
+            // Always init local auth first (creates default admin if needed)
             try {
-                currentUser = await SupabaseAuth.init();
-                console.log('✅ Supabase Auth initialized');
-            } catch (authError) {
-                console.warn('⚠️ Supabase Auth failed, using local auth:', authError);
-                // Fall back to local auth
                 currentUser = await Auth.init();
                 console.log('✅ Local Auth initialized');
+            } catch (e) {
+                console.warn('⚠️ Local auth error:', e);
+            }
+            
+            // Try Supabase auth (optional enhancement)
+            try {
+                await SupabaseAuth.init();
+                if (SupabaseAuth.isLoggedIn()) {
+                    currentUser = SupabaseAuth.getUser();
+                    authMethod = 'supabase';
+                    console.log('✅ Supabase Auth active');
+                }
+            } catch (e) {
+                console.log('ℹ️ Supabase not available, using local auth');
             }
 
             // Check if user is logged in
-            const isLoggedIn = SupabaseAuth.isLoggedIn() || Auth.isLoggedIn();
+            const isLoggedIn = Auth.isLoggedIn() || SupabaseAuth.isLoggedIn();
             
             if (!isLoggedIn) {
                 console.log('👤 No user logged in, showing login screen');
@@ -54,7 +66,7 @@ const app = {
                 return;
             }
 
-            const user = SupabaseAuth.getUser() || Auth.getCurrentUser();
+            const user = currentUser || { name: 'Admin', email: 'admin@billsnapp.com', role: 'admin' };
             console.log('👤 User logged in:', user?.email || user?.name);
 
             // Initialize billing
@@ -240,27 +252,41 @@ const app = {
      */
     async handleLogin(event) {
         event.preventDefault();
-        const email = document.getElementById('login-username').value;
+        const username = document.getElementById('login-username').value;
         const password = document.getElementById('login-password').value;
         const errorEl = document.getElementById('login-error');
 
         try {
             errorEl.classList.add('hidden');
+            errorEl.textContent = '';
             
-            // Try Supabase auth first
+            console.log('Attempting login with:', username);
+            
+            // Try local auth first (admin/admin123)
             try {
-                await SupabaseAuth.signIn(email, password);
+                await Auth.login(username, password);
+                console.log('✅ Local login successful');
                 window.location.reload();
                 return;
-            } catch (e) {
-                console.log('Supabase login failed, trying local:', e.message);
+            } catch (localError) {
+                console.log('Local login failed:', localError.message);
             }
             
-            // Fall back to local auth
-            await Auth.login(email, password);
-            window.location.reload();
+            // Try Supabase auth
+            try {
+                await SupabaseAuth.signIn(username, password);
+                console.log('✅ Supabase login successful');
+                window.location.reload();
+                return;
+            } catch (supabaseError) {
+                console.log('Supabase login failed:', supabaseError.message);
+            }
+            
+            // If both fail, show error
+            throw new Error('Usuario o contraseña incorrectos');
+            
         } catch (error) {
-            errorEl.textContent = error.message || 'Invalid credentials';
+            errorEl.textContent = error.message;
             errorEl.classList.remove('hidden');
         }
     },

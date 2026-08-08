@@ -13,10 +13,10 @@ const CONFIG = {
         supportEmail: 'support@billsnap.app'
     },
 
-    // Supabase (will be filled with real credentials)
+    // Supabase
     supabase: {
-        url: 'YOUR_SUPABASE_URL',
-        anonKey: 'YOUR_SUPABASE_ANON_KEY'
+        url: 'https://seneoohqpewwjrykcait.supabase.co',
+        anonKey: 'sb_publishable_QuKZCxf-kJ4rw-90Shg1GQ_Ns_5kCes'
     },
 
     // Stripe (will be filled with real credentials)

@@ -1,5 +1,5 @@
 /**
- * BillSnap - Main Application Controller
+ * BillsnApp - Main Application Controller
  * Professional invoicing app with AI-powered OCR
  */
 
@@ -178,10 +178,10 @@ const app = {
                 <div class="login-card animate-in">
                     <div class="login-logo">
                         <div style="width: 64px; height: 64px; background: white; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden;">
-                            <img src="public/icons/logo.jpeg" alt="BillSnap" style="width: 60px; height: 60px; object-fit: cover; border-radius: 14px;">
+                            <img src="public/icons/logo.jpeg" alt="BillsnApp" style="width: 60px; height: 60px; object-fit: cover; border-radius: 14px;">
                         </div>
                     </div>
-                    <h1 class="login-title">BillSnap</h1>
+                    <h1 class="login-title">BillsnApp</h1>
                     <p class="login-subtitle">${i18n.t('app.tagline')}</p>
                     
                     <form id="login-form" onsubmit="app.handleLogin(event)">
@@ -243,9 +243,9 @@ const app = {
                 <div class="sidebar-header">
                     <div class="sidebar-logo">
                         <div style="width: 38px; height: 38px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
-                            <img src="public/icons/logo.jpeg" alt="BillSnap" style="width: 36px; height: 36px; object-fit: cover; border-radius: 8px;">
+                            <img src="public/icons/logo.jpeg" alt="BillsnApp" style="width: 36px; height: 36px; object-fit: cover; border-radius: 8px;">
                         </div>
-                        <span class="sidebar-logo-text">BillSnap</span>
+                        <span class="sidebar-logo-text">BillsnApp</span>
                     </div>
                 </div>
 
@@ -649,8 +649,8 @@ const app = {
                                 </h4>
                                 <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">
                                     ${isEs ? 
-                                        'BillSnap procesa tus facturas automáticamente. Sin configurar, sin complicaciones.' :
-                                        'BillSnap processes your invoices automatically. No setup, no complications.'
+                                        'BillsnApp procesa tus facturas automáticamente. Sin configurar, sin complicaciones.' :
+                                        'BillsnApp processes your invoices automatically. No setup, no complications.'
                                     }
                                 </p>
                                 
@@ -1971,7 +1971,7 @@ const app = {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `BillSnap_Invoices_${new Date().toISOString().split('T')[0]}.csv`;
+            link.download = `BillsnApp_Invoices_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
             URL.revokeObjectURL(url);
             this.showToast('CSV exported', 'success');
@@ -1987,7 +1987,7 @@ const app = {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `BillSnap_Backup_${new Date().toISOString().split('T')[0]}.json`;
+            link.download = `BillsnApp_Backup_${new Date().toISOString().split('T')[0]}.json`;
             link.click();
             URL.revokeObjectURL(url);
             this.showToast('Backup exported', 'success');

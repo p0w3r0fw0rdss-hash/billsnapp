@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BillSnap - Organiza tus facturas automáticamente</title>
+    <title>BillsnApp - Organiza tus facturas automáticamente</title>
     <meta name="description" content="Sube fotos de facturas y organízalas automáticamente. Contabilidad automática para autónomos y PYMES.">
     <meta name="theme-color" content="#000000">
     <link rel="icon" type="image/png" href="favicon.png">
@@ -12,23 +12,41 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --yellow: #FFD700;
+            --yellow-light: #FFF8DC;
+            --yellow-dark: #DAA520;
+            --black: #000000;
+            --white: #FFFFFF;
+            --gray-100: #f5f5f5;
+            --gray-200: #e5e5e5;
+            --gray-300: #d4d4d4;
+            --gray-400: #a3a3a3;
+            --gray-500: #737373;
+            --gray-600: #525252;
+            --gray-700: #404040;
+            --gray-800: #262626;
+            --gray-900: #171717;
+        }
+        
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
-        body { font-family: 'Inter', -apple-system, sans-serif; color: #f5f5f7; background: #000; line-height: 1.5; overflow-x: hidden; }
+        body { font-family: 'Inter', -apple-system, sans-serif; color: var(--gray-900); background: var(--white); line-height: 1.5; overflow-x: hidden; }
         
         .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         
         /* NAV */
-        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 12px 0; backdrop-filter: blur(20px); background: rgba(0,0,0,0.8); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 12px 0; backdrop-filter: blur(20px); background: rgba(0,0,0,0.9); border-bottom: 1px solid rgba(255,215,0,0.2); }
         nav .container { display: flex; align-items: center; justify-content: space-between; }
-        .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: white; }
-        .nav-logo img { width: 32px; height: 32px; border-radius: 50%; background: white; padding: 2px; }
-        .nav-logo span { font-weight: 700; font-size: 16px; }
+        .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--white); }
+        .nav-logo img { width: 32px; height: 32px; border-radius: 50%; background: var(--white); padding: 2px; }
+        .nav-logo span { font-weight: 700; font-size: 16px; color: var(--yellow); }
         .nav-links { display: flex; align-items: center; gap: 20px; }
-        .nav-links a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; font-weight: 500; }
-        .nav-links a:hover { color: white; }
-        .nav-cta { background: white; color: #000 !important; padding: 8px 16px; border-radius: 8px; font-weight: 600; }
-        .lang-btn { display: flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 10px; cursor: pointer; color: rgba(255,255,255,0.7); font-size: 12px; }
+        .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--yellow); }
+        .nav-cta { background: var(--yellow); color: var(--black) !important; padding: 8px 16px; border-radius: 8px; font-weight: 600; transition: all 0.2s; }
+        .nav-cta:hover { background: var(--yellow-dark); transform: translateY(-1px); }
+        .lang-btn { display: flex; align-items: center; gap: 4px; background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 6px; padding: 6px 10px; cursor: pointer; color: var(--yellow); font-size: 12px; }
         
         /* HERO */
         .hero { min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; padding: 100px 0 60px; }
@@ -347,7 +365,7 @@
             es: {
                 'nav.features': 'Funciones', 'nav.how': 'Cómo funciona', 'nav.pricing': 'Precios', 'nav.cta': 'Empezar gratis',
                 'hero.badge': 'Disponible ahora — Empieza gratis', 'hero.title': 'Deja que tus facturas se organicen solas',
-                'hero.sub': 'Sube una foto de tu factura y BillSnap extrae los datos, los clasifica y los contabiliza automáticamente.',
+                'hero.sub': 'Sube una foto de tu factura y BillsnApp extrae los datos, los clasifica y los contabiliza automáticamente.',
                 'hero.btn1': 'Empezar gratis', 'hero.btn2': 'Ver cómo funciona',
                 'f.title': 'Todo lo que necesitas', 'f.sub': 'Solo sube tus facturas y el sistema hace el resto.',
                 'f.1': 'Sube fotos', 'f.1d': 'Foto o PDF. El sistema lee los datos automáticamente.',
@@ -364,12 +382,12 @@
                 'p.free': 'Free', 'p.auto': 'Autónomo', 'p.pyme': 'PYME', 'p.gest': 'Gestoría',
                 'p.month': '/mes', 'p.cta': 'Elegir plan', 'p.free.cta': 'Empezar gratis', 'p.popular': 'Popular',
                 'c.title': '¿Listo para simplificar tu contabilidad?', 'c.sub': 'Empieza gratis hoy. Sin tarjeta.',
-                'c.btn': 'Empezar ahora', 'footer': '© 2026 BillSnap. Todos los derechos reservados.',
+                'c.btn': 'Empezar ahora', 'footer': '© 2026 BillsnApp. Todos los derechos reservados.',
             },
             en: {
                 'nav.features': 'Features', 'nav.how': 'How it works', 'nav.pricing': 'Pricing', 'nav.cta': 'Start free',
                 'hero.badge': 'Available now — Start free', 'hero.title': 'Let your invoices organize themselves',
-                'hero.sub': 'Upload a photo and BillSnap extracts, classifies, and accounts for it automatically.',
+                'hero.sub': 'Upload a photo and BillsnApp extracts, classifies, and accounts for it automatically.',
                 'hero.btn1': 'Start free', 'hero.btn2': 'See how it works',
                 'f.title': 'Everything you need', 'f.sub': 'Just upload your invoices and the system does the rest.',
                 'f.1': 'Upload photos', 'f.1d': 'Photo or PDF. System reads data automatically.',
@@ -386,7 +404,7 @@
                 'p.free': 'Free', 'p.auto': 'Freelancer', 'p.pyme': 'SMB', 'p.gest': 'Accountant',
                 'p.month': '/month', 'p.cta': 'Choose plan', 'p.free.cta': 'Start free', 'p.popular': 'Popular',
                 'c.title': 'Ready to simplify your accounting?', 'c.sub': 'Start free today. No card.',
-                'c.btn': 'Start now', 'footer': '© 2026 BillSnap. All rights reserved.',
+                'c.btn': 'Start now', 'footer': '© 2026 BillsnApp. All rights reserved.',
             }
         };
         let lang = 'es';
@@ -398,8 +416,8 @@
     <nav>
         <div class="container">
             <a href="#" class="nav-logo">
-                <img src="public/icons/logo.png" alt="BillSnap">
-                <span>BillSnap</span>
+                <img src="public/icons/logo.png" alt="BillsnApp">
+                <span>BillsnApp</span>
             </a>
             <div class="nav-links">
                 <a href="#features" data-t="nav.features">Funciones</a>
@@ -421,8 +439,8 @@
                     <span style="display: inline-block; width: 8px; height: 8px; background: #34c759; border-radius: 50%; margin-right: 8px; vertical-align: middle; box-shadow: 0 0 8px rgba(52,199,89,0.5);"></span>
                     <span data-t="hero.badge">Disponible ahora — Empieza gratis</span>
                 </div>
-                <h1><span class="hero-title-brand">BillSnap</span><span data-t="hero.title">Deja que tus facturas se organicen solas</span></h1>
-                <p data-t="hero.sub">Sube una foto de tu factura y BillSnap extrae los datos, los clasifica y los contabiliza automáticamente.</p>
+                <h1><span class="hero-title-brand">BillsnApp</span><span data-t="hero.title">Deja que tus facturas se organicen solas</span></h1>
+                <p data-t="hero.sub">Sube una foto de tu factura y BillsnApp extrae los datos, los clasifica y los contabiliza automáticamente.</p>
                 <div class="hero-buttons">
                     <a href="/app" class="btn-primary"><span data-t="hero.btn1">Empezar gratis</span> <span style="font-size: 18px; margin-left: 4px;">→</span></a>
                     <a href="#how" class="btn-secondary" data-t="hero.btn2">Ver cómo funciona</a>
@@ -441,7 +459,7 @@
                             <div class="mockup-side">
                                 <div class="mockup-side-logo">
                                     <div class="mockup-side-logo-icon"><div></div></div>
-                                    <span>BillSnap</span>
+                                    <span>BillsnApp</span>
                                 </div>
                                 <div class="mockup-side-item active">📊 Dashboard</div>
                                 <div class="mockup-side-item">📤 Subir Facturas</div>
@@ -582,6 +600,6 @@
     </section>
 
     <!-- FOOTER -->
-    <footer><div class="container"><p data-t="footer">© 2026 BillSnap. Todos los derechos reservados. · <a href="/app">App</a> · <a href="#pricing">Precios</a></p></div></footer>
+    <footer><div class="container"><p data-t="footer">© 2026 BillsnApp. Todos los derechos reservados. · <a href="/app">App</a> · <a href="#pricing">Precios</a></p></div></footer>
 </body>
 </html>

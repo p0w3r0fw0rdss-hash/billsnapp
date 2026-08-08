@@ -213,7 +213,7 @@ const app = {
                 <div class="login-card animate-in">
                     <div class="login-logo">
                         <div style="width: 64px; height: 64px; background: white; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden;">
-                            <img src="public/icons/logo.jpeg" alt="BillsnApp" style="width: 60px; height: 60px; object-fit: cover; border-radius: 14px;">
+                            <img src="public/icons/logo.png" alt="BillsnApp" style="width: 32px; height: 32px; object-fit: contain;">
                         </div>
                     </div>
                     <h1 class="login-title">BillsnApp</h1>
@@ -304,7 +304,7 @@ const app = {
                 <div class="sidebar-header">
                     <div class="sidebar-logo">
                         <div style="width: 38px; height: 38px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
-                            <img src="public/icons/logo.jpeg" alt="BillsnApp" style="width: 36px; height: 36px; object-fit: cover; border-radius: 8px;">
+                            <img src="public/icons/logo.png" alt="BillsnApp" style="width: 32px; height: 32px; object-fit: contain;">
                         </div>
                         <span class="sidebar-logo-text">BillsnApp</span>
                     </div>
@@ -351,7 +351,7 @@ const app = {
                 <!-- Top Bar -->
                 <header class="top-bar">
                     <div class="top-bar-left">
-                        <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">
+                        <button class="menu-toggle" onclick="app.toggleSidebar()">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="3" y1="12" x2="21" y2="12"></line>
                                 <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -1913,6 +1913,26 @@ const app = {
      */
     closeModal() {
         document.getElementById('modal-overlay').classList.remove('active');
+    },
+
+    /**
+     * Toggle sidebar (mobile)
+     */
+    toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+    },
+
+    /**
+     * Close sidebar (mobile)
+     */
+    closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
     },
 
     /**

@@ -958,6 +958,7 @@
             justify-content: center;
             background: #000;
             padding: 20px;
+            width: 100%;
         }
 
         .login-card {
@@ -1048,6 +1049,86 @@
         }
 
         /* Responsive */
+        
+        /* Mobile sidebar */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                transform: translateX(-100%);
+                z-index: 50;
+                width: 280px;
+                background: var(--bg-primary);
+                box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 45;
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
+            .menu-toggle {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+                background: var(--bg-secondary);
+                border: none;
+                cursor: pointer;
+            }
+            .top-bar {
+                padding: 0 16px;
+            }
+            .search-bar {
+                width: 150px;
+            }
+            .content-area {
+                padding: 16px;
+            }
+            .page-title {
+                font-size: 22px;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            .stat-card {
+                padding: 12px;
+            }
+            .stat-value {
+                font-size: 20px;
+            }
+            .stat-label {
+                font-size: 11px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+            .stat-card {
+                padding: 10px;
+            }
+            .stat-value {
+                font-size: 18px;
+            }
+            .search-bar {
+                width: 120px;
+            }
+        }
         @media (max-width: 768px) {
             .sidebar {
                 position: fixed;

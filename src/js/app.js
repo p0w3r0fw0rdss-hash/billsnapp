@@ -295,18 +295,24 @@ const app = {
      * Render main application
      */
     renderApp() {
-        const user = SupabaseAuth.getUser() || Auth.getCurrentUser() || { name: 'User', email: 'user@example.com' };
+        const user = SupabaseAuth.getUser() || Auth.getCurrentUser() || { name: 'Admin', email: 'admin@billsnapp.com', role: 'admin' };
         const appEl = document.getElementById('app');
+        const isEs = i18n.getLang() === 'es';
         
         appEl.innerHTML = `
+            <div class="sidebar-overlay" id="sidebar-overlay" onclick="app.closeSidebar()"></div>
+            
             <!-- Sidebar -->
-            <aside class="sidebar ${this.sidebarOpen ? 'open' : ''}" id="sidebar">
+            <aside class="sidebar" id="sidebar">
                 <div class="sidebar-header">
                     <div class="sidebar-logo">
-                        <div style="width: 36px; height: 36px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <div style="width: 36px; height: 36px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                             <img src="public/icons/logo.png" alt="BillsnApp" style="width: 32px; height: 32px; object-fit: cover;">
                         </div>
-
+                        <span class="sidebar-logo-text" style="color: #FFD700;">BillsnApp</span>
+                    </div>
+                </div>
+                
                 <nav class="sidebar-nav">
                     <div class="nav-section">
                         <div class="nav-section-title">${i18n.getLang() === 'es' ? 'Principal' : 'Main'}</div>

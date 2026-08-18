@@ -417,9 +417,9 @@ const NativeAI = {
 
         // ---- NIF/CIF/VAT ----
         const nifPatterns = [
-            /(?:NIF|CIF|N\.I\.F\.|C\.I\.F\.|VAT|Tax ID|IVA|CIF/NIF)[\s:]*([A-Z]?\d{7,8}[A-Z0-9]?)/i,
-            /([A-Z]\d{8})/g,
-            /(\d{8}[A-Z])/g
+            /(?:NIF|CIF|N\.I\.F\.|C\.I\.F\.|VAT|Tax ID|IVA|CIF\/NIF)[\s:]*([A-Z]?\d{7,8}[A-Z0-9]?)/i,
+            /([A-Z]\d{8})/,
+            /(\d{8}[A-Z])/
         ];
 
         const nifs = [];

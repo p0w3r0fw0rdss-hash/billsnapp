@@ -209,15 +209,15 @@ const app = {
     renderLoginScreen() {
         const appEl = document.getElementById('app');
         appEl.innerHTML = `
-            <div class="login-container">
-                <div class="login-card animate-in">
-                    <div class="login-logo">
-                        <div style="width: 64px; height: 64px; background: white; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden;">
-                            <img src="public/icons/logo.png" alt="BillsnApp" style="width: 32px; height: 32px; object-fit: contain;">
+            <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; padding: 20px;">
+                <div style="background: #111; border-radius: 20px; padding: 40px; width: 100%; max-width: 400px; border: 1px solid rgba(255,215,0,0.1); box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <div style="width: 72px; height: 72px; background: white; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto; overflow: hidden;">
+                            <img src="public/icons/logo.png" alt="BillsnApp" style="width: 68px; height: 68px; object-fit: cover;">
                         </div>
                     </div>
-                    <h1 class="login-title">BillsnApp</h1>
-                    <p class="login-subtitle">${i18n.t('app.tagline')}</p>
+                    <h1 style="font-size: 28px; font-weight: 800; text-align: center; color: #FFD700; margin-bottom: 4px;">BillsnApp</h1>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.5); text-align: center; margin-bottom: 24px;">${i18n.t('app.tagline')}</p>
                     
                     <form id="login-form" onsubmit="app.handleLogin(event)">
                         <div style="margin-bottom: 16px;">
@@ -303,12 +303,9 @@ const app = {
             <aside class="sidebar ${this.sidebarOpen ? 'open' : ''}" id="sidebar">
                 <div class="sidebar-header">
                     <div class="sidebar-logo">
-                        <div style="width: 38px; height: 38px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
-                            <img src="public/icons/logo.png" alt="BillsnApp" style="width: 32px; height: 32px; object-fit: contain;">
+                        <div style="width: 36px; height: 36px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                            <img src="public/icons/logo.png" alt="BillsnApp" style="width: 32px; height: 32px; object-fit: cover;">
                         </div>
-                        <span class="sidebar-logo-text">BillsnApp</span>
-                    </div>
-                </div>
 
                 <nav class="sidebar-nav">
                     <div class="nav-section">
@@ -367,7 +364,7 @@ const app = {
                         </div>
                     </div>
                     <div class="top-bar-right">
-                        <button class="lang-selector" onclick="app.switchLang(i18n.getLang() === 'es' ? 'en' : 'es')">
+                        <button style="padding: 6px 12px; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.15); border-radius: 6px; cursor: pointer; color: #FFD700; font-size: 12px; font-weight: 500;" onclick="app.switchLang(i18n.getLang() === 'es' ? 'en' : 'es')">
                             ${i18n.getLang() === 'es' ? '🇪🇸 ES' : '🇬🇧 EN'}
                         </button>
                         <div class="theme-toggle" onclick="app.toggleTheme()">

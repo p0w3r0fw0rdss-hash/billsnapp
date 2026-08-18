@@ -303,6 +303,7 @@ const app = {
             <div class="sidebar-overlay" id="sidebar-overlay" onclick="app.closeSidebar()"></div>
             
             <!-- Sidebar -->
+            <div class="sidebar-overlay" id="sidebar-overlay" onclick="app.closeSidebar()"></div>
             <aside class="sidebar" id="sidebar">
                 <div class="sidebar-header">
                     <div class="sidebar-logo">
@@ -416,10 +417,7 @@ const app = {
      * Show a section
      */
     async showSection(sectionId) {
-        if (!Auth.hasPermission('view') && sectionId !== 'settings') {
-            this.showToast(i18n.t('msg.no_permission'), 'error');
-            return;
-        }
+        console.log('Showing section:', sectionId);
 
         this.currentSection = sectionId;
 
@@ -439,7 +437,8 @@ const app = {
             case 'dashboard':
                 this.renderDashboard(contentArea);
                 break;
-            this.renderUpload(contentArea);
+            case 'upload':
+                this.renderUpload(contentArea);
                 break;
             case 'invoices':
                 this.renderInvoices(contentArea);
